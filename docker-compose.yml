@@ -1,0 +1,32 @@
+networks:
+    my_network:
+        driver: bridge
+
+services:
+    techno-scraper:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: techno-scraper
+        restart: unless-stopped
+        ports:
+            - "127.0.0.1:8000:8000" # Exposé uniquement sur localhost
+        environment:
+            - DEBUG=False
+            - API_KEY=${API_KEY:-your-api-key-here}
+            - HOST=0.0.0.0
+            - PORT=8000
+            - LOG_LEVEL=INFO
+            - MAX_RETRIES=3
+            - RETRY_BACKOFF_FACTOR=0.5
+            - REQUEST_TIMEOUT=30
+        volumes:
+            - ./app:/app/app # Pour le développement (hot reload)
+        networks:
+            - my_network
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8000/status"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 5s
