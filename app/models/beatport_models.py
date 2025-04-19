@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from pydantic import Field
 
-from app.models import ArtistProfile, Release, Track, Pagination
+from app.models import ArtistProfile, Release, Pagination, Track
 
 
 class BeatportProfile(ArtistProfile):

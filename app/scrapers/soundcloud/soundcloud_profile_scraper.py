@@ -6,16 +6,19 @@ from typing import Any, Dict, List, Optional
 from bs4 import BeautifulSoup
 
 from app.core.errors import ParsingException, ResourceNotFoundException
-from app.models import SocialLink, SoundcloudProfile, Track
+from app.models import SoundcloudProfile, Track
 from app.scrapers.base_scraper import BaseScraper
+from app.scrapers.soundcloud.soundcloud_mapping_utils import SoundcloudMappingUtils
 
 logger = logging.getLogger(__name__)
 
 
-class SoundcloudScraper(BaseScraper):
-    BASE_URL = "https://soundcloud.com"
+class SoundcloudProfileScraper(BaseScraper):
+    BASE_URL = SoundcloudMappingUtils.BASE_URL
 
     async def scrape(self, username: str) -> SoundcloudProfile:
+        logger.info(f"Récupération du profil: {username}")
+
         profile_url = f"{self.BASE_URL}/{username}"
 
         response = await self.fetch(profile_url)
@@ -37,12 +40,9 @@ class SoundcloudScraper(BaseScraper):
                     details={"url": profile_url}
                 )
 
-            profile = self._build_profile(json_data, username, profile_url)
+            profile = SoundcloudMappingUtils.build_profile(json_data, profile_url, username)
 
-            tracks = self._extract_tracks(json_data)
-            if tracks:
-                profile.tracks = tracks
-
+            logger.info(f"Profil récupéré: {profile.name}")
             return profile
 
         except Exception as e:
@@ -72,43 +72,3 @@ class SoundcloudScraper(BaseScraper):
 
         return {}
 
-    def _build_profile(self, json_data: Dict[str, Any], username: str, profile_url: str) -> SoundcloudProfile:
-        social_links = self._extract_social_links(json_data)
-
-        return SoundcloudProfile(
-            name=json_data.get("username", username),
-            url=profile_url,
-            bio=json_data.get("description", ""),
-            followers_count=json_data.get("followers_count", 0),
-            location=json_data.get("city", ""),
-            website=json_data.get("website", None),
-            social_links=social_links,
-            avatar_url=json_data.get("avatar_url", None),
-            track_count=json_data.get("track_count", 0),
-            reposts_count=json_data.get("reposts_count", 0),
-            likes_count=json_data.get("likes_count", 0)
-        )
-
-    def _extract_social_links(self, json_data: Dict[str, Any]) -> List[SocialLink]:
-        social_links = []
-
-        if "permalink_url" in json_data:
-            social_links.append(SocialLink(
-                platform="soundcloud",
-                url=json_data["permalink_url"],
-            ))
-
-        for network in ["facebook", "instagram"]:
-            if f"{network}_url" in json_data and json_data[f"{network}_url"]:
-                social_links.append(SocialLink(
-                    platform=network,
-                    url=json_data[f"{network}_url"],
-                ))
-
-        return social_links
-
-    def _extract_tracks(self, json_data: Dict[str, Any]) -> Optional[List[Track]]:
-        # Cette méthode est un placeholder
-        # Dans une implémentation réelle, il faudrait faire une requête supplémentaire
-        # pour récupérer les tracks de l'utilisateur
-        return None

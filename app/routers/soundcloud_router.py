@@ -1,13 +1,11 @@
-from typing import Optional
-
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.errors import (ParsingException, ResourceNotFoundException,
                              ScraperException)
 from app.core.security import get_api_key
-from app.models import (ErrorResponse, SoundcloudProfile,
-                                SoundcloudSearchResult)
-from app.scrapers import SoundcloudScraper
+from app.models import (ErrorResponse, SoundcloudProfile, SoundcloudSearchResult,
+                       LimitEnum)
+from app.scrapers import SoundcloudProfileScraper, SoundcloudSearchProfileScraper
 
 # Création du router
 router = APIRouter(
@@ -24,35 +22,35 @@ router = APIRouter(
 
 
 @router.get(
-    "/profile/{username}",
-    response_model=SoundcloudProfile,
-    summary="Récupérer un profil Soundcloud",
-    description="Récupère les informations d'un profil Soundcloud à partir de son nom d'utilisateur",
+    "/search-profile/{name}",
+    response_model=SoundcloudSearchResult,
+    summary="Rechercher des profils Soundcloud",
+    description="Recherche des profils Soundcloud à partir du nom avec options de pagination",
 )
-async def get_profile(username: str):
+async def search_profiles(
+    name: str,
+    page: int = 1,
+    limit: LimitEnum = LimitEnum.TEN
+):
     try:
-        scraper = SoundcloudScraper()
-        profile = await scraper.scrape(username)
-        return profile
-    
+        scraper = SoundcloudSearchProfileScraper()
+        search_results = await scraper.scrape(name, page, limit)
+        return search_results
     except ResourceNotFoundException as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=e.message,
         )
-    
     except ParsingException as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=e.message,
         )
-    
     except ScraperException as e:
         raise HTTPException(
             status_code=e.status_code,
             detail=e.message,
         )
-    
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -61,25 +59,34 @@ async def get_profile(username: str):
 
 
 @router.get(
-    "/search",
-    response_model=SoundcloudSearchResult,
-    summary="Rechercher sur Soundcloud",
-    description="Recherche des profils et des tracks sur Soundcloud",
+    "/profile/{username}",
+    response_model=SoundcloudProfile,
+    summary="Récupérer un profil Soundcloud",
+    description="Récupère les informations d'un profil Soundcloud à partir de son nom d'utilisateur",
 )
-async def search(
-    query: str = Query(..., description="Terme de recherche"),
-    type: Optional[str] = Query(
-        None, 
-        description="Type de recherche (all, users, tracks)",
-        regex="^(all|users|tracks)$"
-    ),
-    limit: int = Query(10, ge=1, le=100, description="Nombre de résultats à retourner"),
-    offset: int = Query(0, ge=0, description="Offset pour la pagination"),
-):
-    return SoundcloudSearchResult(
-        profiles=[],
-        tracks=[],
-        total_results=0,
-        page=offset // limit + 1,
-        has_more=False
-    )
+async def get_profile(username: str):
+    try:
+        scraper = SoundcloudProfileScraper()
+        profile = await scraper.scrape(username)
+        return profile
+    except ResourceNotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+    except ParsingException as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=e.message,
+        )
+    except ScraperException as e:
+        raise HTTPException(
+            status_code=e.status_code,
+            detail=e.message,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erreur inattendue: {str(e)}",
+        )
+

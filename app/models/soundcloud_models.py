@@ -6,10 +6,9 @@ from app.models import ArtistProfile, Track, Pagination
 
 
 class SoundcloudProfile(ArtistProfile):
-    track_count: Optional[int] = None
+    id: int
+    username: Optional[str] = None
     tracks: Optional[List[Track]] = None
-    reposts_count: Optional[int] = None
-    likes_count: Optional[int] = None
 
 class SoundcloudSearchResult(Pagination):
     profiles: List[SoundcloudProfile] = Field(default_factory=list)

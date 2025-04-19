@@ -1,1 +1,1 @@
-from .soundcloud_scraper import SoundcloudScraper
+from app.scrapers.soundcloud import SoundcloudProfileScraper, SoundcloudSearchProfileScraper
