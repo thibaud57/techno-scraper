@@ -7,7 +7,6 @@ from app.models import ArtistProfile, Track, Pagination
 
 class SoundcloudProfile(ArtistProfile):
     id: int
-    username: Optional[str] = None
     tracks: Optional[List[Track]] = None
 
 class SoundcloudSearchResult(Pagination):

@@ -18,7 +18,7 @@ Le projet techno-scraper est une API FastAPI conçue pour scraper des données d
 -   Structure de base de l'application FastAPI
 -   Authentification par clé API
 -   Gestion des erreurs et des retries
--   Scraper pour les profils Soundcloud
+-   Scraper pour les profils Soundcloud (par ID)
 -   Scraper pour la recherche de profils Soundcloud
 -   Modèles de données pour les résultats de pagination
 -   Mise à jour des modèles Beatport
@@ -31,7 +31,10 @@ Le projet techno-scraper est une API FastAPI conçue pour scraper des données d
 -   Implémentation d'un modèle de pagination générique
 -   Amélioration de la classe BaseScraper pour tous les scrapers
 -   Mise à jour des dépendances dans requirements.txt
--   Intégration de nouveaux utilitaires de mapping pour Soundcloud
+-   Refactorisation du scraper de profil Soundcloud pour utiliser l'API directement avec les IDs
+-   Simplification des scrapers pour une maintenance plus facile
+-   Standardisation de la construction des URLs d'API SoundCloud
+-   Optimisation du code boilerplate dans les scrapers
 
 ### Problèmes résolus
 
@@ -39,6 +42,8 @@ Le projet techno-scraper est une API FastAPI conçue pour scraper des données d
     -   Solution : Utilisation correcte de `Depends(get_api_key)` au lieu de `Depends(api_key_auth)`
 -   Restructuration des modules pour éviter les imports circulaires
 -   Amélioration de la gestion des réponses d'API externes
+-   Résolution des problèmes de lookup par username avec une approche basée sur les IDs
+-   Simplification de l'interface de l'API pour une utilisation plus intuitive
 
 ## Intégration API SoundCloud
 
@@ -53,9 +58,9 @@ L'API SoundCloud utilisée par notre scraper offre plusieurs fonctionnalités cl
 
 ### Fonctionnalités implémentées
 
--   Résolution d'URLs SoundCloud via l'endpoint `/resolve`
--   Recherche de profils via les paramètres `q` pour les requêtes
--   Support de la pagination avec le paramètre `linked_partitioning`
+-   Récupération de profils via l'endpoint `/users/{id}`
+-   Recherche de profils via l'endpoint `/search/users` avec paramètre `q`
+-   Support de la pagination avec les paramètres `offset` et `limit`
 -   Gestion des erreurs avec les codes HTTP appropriés
 
 ### Limites connues
@@ -63,6 +68,14 @@ L'API SoundCloud utilisée par notre scraper offre plusieurs fonctionnalités cl
 -   L'API SoundCloud impose des limites de taux (rate limits)
 -   Les résultats sont limités à 50 par défaut (max 200)
 -   Certaines fonctionnalités nécessitent une authentification utilisateur
+-   L'API nécessite un `client_id` valide qui pourrait expirer
+
+## Flux de travail recommandé
+
+Pour obtenir un profil SoundCloud :
+1. Utiliser l'endpoint de recherche pour trouver les profils par nom
+2. Récupérer l'ID du profil souhaité dans les résultats de recherche
+3. Utiliser l'endpoint profil avec l'ID pour obtenir les détails complets
 
 ## Prochaines étapes
 

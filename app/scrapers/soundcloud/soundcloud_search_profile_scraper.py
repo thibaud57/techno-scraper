@@ -29,7 +29,9 @@ class SoundcloudSearchProfileScraper(BaseScraper):
 
         try:
             json_data = response.json()
+
             search_result = self._build_search_result_from_api(json_data, page, limit)
+
             logger.info(f"Recherche terminée: {len(search_result.profiles)} profils trouvés (page {page})")
             return search_result
 
@@ -43,19 +45,19 @@ class SoundcloudSearchProfileScraper(BaseScraper):
 
     def _build_search_result_from_api(self, json_data: Dict[str, Any], page: int, limit: LimitEnum) -> SoundcloudSearchResult:
         total_results = json_data.get("total_results", 0)
-        
+
         profiles = []
         collection = json_data.get("collection", [])
-        
+
         for user_data in collection:
             if user_data.get("kind") == "user":
                 profile = SoundcloudMappingUtils.build_profile(user_data)
                 profiles.append(profile)
-        
+
 
         return SoundcloudSearchResult(
             total_results=total_results,
             page=page,
             limit=limit,
             profiles=profiles
-        ) 
+        )

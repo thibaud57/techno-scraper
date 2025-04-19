@@ -59,15 +59,15 @@ async def search_profiles(
 
 
 @router.get(
-    "/profile/{username}",
+    "/profile/{user_id}",
     response_model=SoundcloudProfile,
-    summary="Récupérer un profil Soundcloud",
-    description="Récupère les informations d'un profil Soundcloud à partir de son nom d'utilisateur",
+    summary="Récupérer un profil Soundcloud par ID",
+    description="Récupère les informations d'un profil Soundcloud à partir de son ID numérique",
 )
-async def get_profile(username: str):
+async def get_profile(user_id: int):
     try:
         scraper = SoundcloudProfileScraper()
-        profile = await scraper.scrape(username)
+        profile = await scraper.scrape(user_id)
         return profile
     except ResourceNotFoundException as e:
         raise HTTPException(
