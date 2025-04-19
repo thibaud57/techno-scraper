@@ -11,6 +11,5 @@ class ArtistProfile(BaseModel):
     bio: Optional[str] = None
     followers_count: Optional[int] = None
     location: Optional[str] = None
-    website: Optional[HttpUrl] = None
     social_links: Optional[List[SocialLink]] = None
     avatar_url: Optional[HttpUrl] = None

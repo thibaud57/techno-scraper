@@ -8,14 +8,16 @@ Techno-scraper est une API FastAPI qui permet de récupérer des données de dif
 
 ## 🚀 Fonctionnalités
 
--   Scraping de profils Soundcloud
--   Recherche sur Soundcloud
--   _(À venir)_ Scraping de profils Beatport
--   _(À venir)_ Recherche sur Beatport
--   _(À venir)_ Scraping de profils Bandcamp
--   _(À venir)_ Scraping de profils Facebook
--   _(À venir)_ Scraping de profils Instagram
--   _(À venir)_ Scraping de statistiques Songstats
+### Soundcloud
+- **Recherche profils** : Extraction des informations détaillées des profils d'artistes
+- **Profil par id** : Extraction des données d'un profil en recherchant par son id
+- **Réseaux sociaux** : Récupération des liens vers les plateformes externes (Facebook, Instagram, Spotify, etc.)
+
+### À venir
+- **Beatport** : Recherche et profils d'artistes, releases
+- **Bandcamp** : Informations sur les artistes et leurs albums
+- **Facebook/Instagram** : Extraction de données des réseaux sociaux
+- **Songstats** : Récupération des statistiques de streaming
 
 ## 🛠️ Technologies utilisées
 
@@ -23,6 +25,7 @@ Techno-scraper est une API FastAPI qui permet de récupérer des données de dif
 -   [BeautifulSoup4](https://www.crummy.com/software/BeautifulSoup/) - Parsing HTML
 -   [HTTPX](https://www.python-httpx.org/) - Client HTTP asynchrone
 -   [Pydantic](https://pydantic-docs.helpmanual.io/) - Validation de données
+-   [asyncio](https://docs.python.org/3/library/asyncio.html) - Programmation asynchrone pour requêtes concurrentes
 -   [Docker](https://www.docker.com/) - Conteneurisation
 -   [GitHub Actions](https://github.com/features/actions) - CI/CD
 
@@ -88,7 +91,7 @@ L'API utilise une authentification par clé API. Pour accéder aux endpoints, vo
 Exemple :
 
 ```bash
-curl -X GET "http://localhost:8000/api/soundcloud/profile/techno-artist" -H "X-API-Key: your-api-key-here"
+curl -X GET "http://localhost:8000/api/soundcloud/profile/123456" -H "X-API-Key: your-api-key-here"
 ```
 
 ## 🧪 Tests

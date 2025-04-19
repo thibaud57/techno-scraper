@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List
 
 from app.core.errors import (ParsingException, ResourceNotFoundException,
                              ScraperException)
 from app.core.security import get_api_key
 from app.models import (ErrorResponse, SoundcloudProfile, SoundcloudSearchResult,
-                       LimitEnum)
-from app.scrapers import SoundcloudProfileScraper, SoundcloudSearchProfileScraper
+                       LimitEnum, SocialLink)
+from app.scrapers import (
+    SoundcloudProfileScraper,
+    SoundcloudSearchProfileScraper,
+    SoundcloudWebprofilesScraper
+)
 
 # Création du router
 router = APIRouter(
@@ -69,6 +74,39 @@ async def get_profile(user_id: int):
         scraper = SoundcloudProfileScraper()
         profile = await scraper.scrape(user_id)
         return profile
+    except ResourceNotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+    except ParsingException as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=e.message,
+        )
+    except ScraperException as e:
+        raise HTTPException(
+            status_code=e.status_code,
+            detail=e.message,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erreur inattendue: {str(e)}",
+        )
+
+
+@router.get(
+    "/profile/{user_id}/webprofiles",
+    response_model=List[SocialLink],
+    summary="Récupérer les réseaux sociaux d'un profil Soundcloud",
+    description="Récupère les liens vers les réseaux sociaux d'un profil Soundcloud à partir de son ID numérique",
+)
+async def get_profile_webprofiles(user_id: int):
+    try:
+        scraper = SoundcloudWebprofilesScraper()
+        social_links = await scraper.scrape(user_id)
+        return social_links
     except ResourceNotFoundException as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

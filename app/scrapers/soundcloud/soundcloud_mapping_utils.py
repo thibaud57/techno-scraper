@@ -3,40 +3,40 @@ from typing import Any, Dict, List, Optional
 
 try:
     import pycountry
+
     PYCOUNTRY_AVAILABLE = True
 except ImportError:
     PYCOUNTRY_AVAILABLE = False
 
 from app.models import SocialLink, SoundcloudProfile, Track, LimitEnum
+from app.models.soundcloud_models import SOUNDCLOUD_BASE_URL, SOUNDCLOUD_API_URL, SOUNDCLOUD_CLIENT_ID
 
 logger = logging.getLogger(__name__)
 
 
 class SoundcloudMappingUtils:
-    BASE_URL = "https://soundcloud.com"
-    API_URL = "https://api-v2.soundcloud.com"
-    CLIENT_ID = "EjkRJG0BLNEZquRiPZYdNtJdyGtTuHdp"
-    APP_VERSION = "1744919743"
-    USER_ID = "50521-276103-240042-666142"
+    """Utilitaires pour mapper les données SoundCloud vers nos modèles"""
 
     @staticmethod
-    def build_api_url_with_pagination(encoded_query: str, page: int, limit: LimitEnum) -> str: 
+    def build_api_url_with_pagination(encoded_query: str, page: int, limit: LimitEnum) -> str:
         offset = (page - 1) * limit.value
-        return f"{SoundcloudMappingUtils.API_URL}/search/users?q={encoded_query}&client_id={SoundcloudMappingUtils.CLIENT_ID}&app_version={SoundcloudMappingUtils.APP_VERSION}&user_id={SoundcloudMappingUtils.USER_ID}&limit={limit.value}&offset={offset}"
+        return f"{SOUNDCLOUD_API_URL}/search/users?q={encoded_query}&client_id={SOUNDCLOUD_CLIENT_ID}&limit={limit.value}&offset={offset}"
 
     @staticmethod
     def build_api_user_url(user_id: int) -> str:
-        return f"{SoundcloudMappingUtils.API_URL}/users/{user_id}?client_id={SoundcloudMappingUtils.CLIENT_ID}"
+        return f"{SOUNDCLOUD_API_URL}/users/soundcloud:users:{user_id}?client_id={SOUNDCLOUD_CLIENT_ID}"
 
-
+    @staticmethod
+    def build_api_webprofiles_url(user_id: int) -> str:
+        return f"{SOUNDCLOUD_API_URL}/users/soundcloud:users:{user_id}/web-profiles?client_id={SOUNDCLOUD_CLIENT_ID}"
 
     @staticmethod
     def build_profile(
-            user_data: Dict[str, Any]
+            user_data: Dict[str, Any],
+            social_links: List[SocialLink]
     ) -> SoundcloudProfile:
         profile_url = SoundcloudMappingUtils.build_profile_url(user_data)
         country = SoundcloudMappingUtils.get_country_name(user_data.get("country_code"))
-        social_links = SoundcloudMappingUtils.extract_social_links(user_data)
 
         return SoundcloudProfile(
             id=user_data.get("id", 0),
@@ -45,7 +45,6 @@ class SoundcloudMappingUtils:
             bio=user_data.get("description", ""),
             followers_count=user_data.get("followers_count", 0),
             location=country,
-            website=user_data.get("website", None),
             social_links=social_links,
             avatar_url=user_data.get("avatar_url", None),
         )
@@ -57,9 +56,9 @@ class SoundcloudMappingUtils:
         elif "permalink" in user_data:
             permalink = user_data.get("permalink", "")
             if permalink:
-                return f"{SoundcloudMappingUtils.BASE_URL}/{permalink}"
+                return f"{SOUNDCLOUD_BASE_URL}/{permalink}"
         return None
-    
+
     @staticmethod
     def get_country_name(country_code: Optional[str]) -> Optional[str]:
         if not country_code:
@@ -67,7 +66,7 @@ class SoundcloudMappingUtils:
         if not PYCOUNTRY_AVAILABLE:
             logger.warning("La bibliothèque pycountry n'est pas disponible. Le code pays ne sera pas converti.")
             return country_code
-        
+
         try:
             code = country_code.upper()
             country = None
@@ -86,32 +85,17 @@ class SoundcloudMappingUtils:
     def extract_social_links(user_data: Dict[str, Any]) -> List[SocialLink]:
         social_links = []
 
-        # sur le profil du ser y a un script web-profiles avec dedans tout
-        # Le permalink il sert à rien là avec le lien soundcloud vu que je l'ai déjà
+        for item in user_data:
+            if "url" in item and "network" in item:
+                network = item["network"]
+                url = item["url"]
+                # Convertir 'personal' en 'website'
+                if network == "personal":
+                    network = "website"
 
-        # Lien SoundCloud
-        if "permalink_url" in user_data:
-            social_links.append(SocialLink(
-                platform="soundcloud",
-                url=user_data["permalink_url"],
-            ))
-        # Cas où seul le permalink est disponible
-        elif "permalink" in user_data:
-            permalink = user_data.get("permalink", "")
-            if permalink:
-                url = f"{SoundcloudMappingUtils.BASE_URL}/{permalink}"
-                social_links.append(SocialLink(
-                    platform="soundcloud",
-                    url=url,
-                ))
-
-        # Autres liens sociaux (pas toujours disponibles dans l'API de recherche)
-        for network in ["facebook", "instagram"]:
-            if f"{network}_url" in user_data and user_data[f"{network}_url"]:
-                social_links.append(SocialLink(
-                    platform=network,
-                    url=user_data[f"{network}_url"],
-                ))
+                social_link = SocialLink.from_service(network, url)
+                if social_link:
+                    social_links.append(social_link)
 
         return social_links
 

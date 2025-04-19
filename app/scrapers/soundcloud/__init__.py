@@ -1,3 +1,4 @@
 from .soundcloud_profile_scraper import SoundcloudProfileScraper
 from .soundcloud_search_profile_scraper import SoundcloudSearchProfileScraper
 from .soundcloud_mapping_utils import SoundcloudMappingUtils
+from .soundcloud_webprofiles_scraper import SoundcloudWebprofilesScraper

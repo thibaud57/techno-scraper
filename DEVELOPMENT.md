@@ -18,23 +18,24 @@ Le projet techno-scraper est une API FastAPI conçue pour scraper des données d
 -   Structure de base de l'application FastAPI
 -   Authentification par clé API
 -   Gestion des erreurs et des retries
--   Scraper pour les profils Soundcloud (par ID)
--   Scraper pour la recherche de profils Soundcloud
--   Modèles de données pour les résultats de pagination
--   Mise à jour des modèles Beatport
+-   Modèles de données pour les résultats et la pagination
 -   Support des scrapers modulaires avec BaseScraper
+-   Service de retries
+-   Scraper pour Soundcloud
+    - Recherche de profils
+    - Profil (par ID)
+    - Réseaux sociaux
 
 ### Modifications récentes (19/04/2025)
 
--   Restructuration du module Soundcloud avec une architecture plus modulaire
--   Ajout d'un scraper pour la recherche de profils Soundcloud
--   Implémentation d'un modèle de pagination générique
--   Amélioration de la classe BaseScraper pour tous les scrapers
--   Mise à jour des dépendances dans requirements.txt
--   Refactorisation du scraper de profil Soundcloud pour utiliser l'API directement avec les IDs
--   Simplification des scrapers pour une maintenance plus facile
--   Standardisation de la construction des URLs d'API SoundCloud
--   Optimisation du code boilerplate dans les scrapers
+-   Optimisation majeure des scrapers Soundcloud avec requêtes concurrentes
+-   Implémentation de l'extraction des réseaux sociaux via l'API web-profiles
+-   Refactorisation du scraper de profil pour récupérer le profil et les réseaux sociaux en parallèle
+-   Amélioration du scraper de recherche pour récupérer les réseaux sociaux pour tous les profils trouvés
+-   Standardisation de l'approche asynchrone avec asyncio pour de meilleures performances
+-   Amélioration des performances avec l'extraction parallèle des réseaux sociaux
+-   Réduction du boilerplate code dans les scrapers
+-   Meilleure gestion des erreurs pour les appels API concurrents
 
 ### Problèmes résolus
 
@@ -44,6 +45,8 @@ Le projet techno-scraper est une API FastAPI conçue pour scraper des données d
 -   Amélioration de la gestion des réponses d'API externes
 -   Résolution des problèmes de lookup par username avec une approche basée sur les IDs
 -   Simplification de l'interface de l'API pour une utilisation plus intuitive
+-   Optimisation de la récupération des réseaux sociaux avec des requêtes concurrentes
+-   Meilleur mappage des types de réseaux sociaux aux plateformes standardisées
 
 ## Intégration API SoundCloud
 
@@ -58,10 +61,12 @@ L'API SoundCloud utilisée par notre scraper offre plusieurs fonctionnalités cl
 
 ### Fonctionnalités implémentées
 
--   Récupération de profils via l'endpoint `/users/{id}`
 -   Recherche de profils via l'endpoint `/search/users` avec paramètre `q`
+-   Récupération de profils via l'endpoint `/users/{id}`
+-   Récupération des réseaux sociaux via l'endpoint `/users/{id}/web-profiles`
 -   Support de la pagination avec les paramètres `offset` et `limit`
 -   Gestion des erreurs avec les codes HTTP appropriés
+-   Exécution concurrente des requêtes pour de meilleures performances
 
 ### Limites connues
 
@@ -72,10 +77,10 @@ L'API SoundCloud utilisée par notre scraper offre plusieurs fonctionnalités cl
 
 ## Flux de travail recommandé
 
-Pour obtenir un profil SoundCloud :
+Pour obtenir un profil SoundCloud complet avec ses réseaux sociaux :
 1. Utiliser l'endpoint de recherche pour trouver les profils par nom
-2. Récupérer l'ID du profil souhaité dans les résultats de recherche
-3. Utiliser l'endpoint profil avec l'ID pour obtenir les détails complets
+2. Les profils retournés incluent déjà leurs réseaux sociaux grâce à l'optimisation concurrente
+3. Alternativement, utiliser directement l'endpoint profil avec un ID pour obtenir un profil spécifique
 
 ## Prochaines étapes
 
@@ -141,6 +146,8 @@ Pour obtenir un profil SoundCloud :
 -   L'API est conçue pour être accessible uniquement en loopback sur le VPS
 -   SoundCloud supporte CORS pour les requêtes cross-domain
 -   Les erreurs de l'API SoundCloud sont gérées via les codes HTTP standards (400, 401, 403, etc.)
+-   Les scrapers utilisent asyncio pour exécuter des requêtes en parallèle et améliorer les performances
+-   Les profils et leurs réseaux sociaux sont récupérés simultanément grâce à l'exécution concurrente
 
 ## Ressources
 
