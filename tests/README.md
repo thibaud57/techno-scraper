@@ -15,6 +15,8 @@ tests/
 │   ├── beatport/        # Tests spécifiques pour Beatport 
 │   └── ...              # Tests pour d'autres scrapers
 └── services/            # Tests pour les services génériques
+    ├── test_retry_service.py  # Tests pour le service de retry
+    └── ...              # Tests pour d'autres services
 ```
 
 ## Exécution des tests
@@ -72,4 +74,16 @@ async def test_async_function(self, mock_method):
 ## Coverage
 
 Le rapport de couverture de code est généré automatiquement lors de l'exécution des tests. 
-Les résultats sont affichés dans la console et peuvent être consultés en détail. 
+Les résultats sont affichés dans la console et peuvent être consultés en détail.
+
+## Services
+
+Les tests des services (`tests/services/`) vérifient les fonctionnalités des composants génériques de l'application :
+
+- **Service de retry** : gestion des tentatives en cas d'échecs temporaires (synchrone et asynchrone)
+
+Pour tester un service spécifique avec couverture de code :
+
+```bash
+python -m pytest tests/services/test_nom_service.py -v --cov=app.services.nom_service
+``` 
