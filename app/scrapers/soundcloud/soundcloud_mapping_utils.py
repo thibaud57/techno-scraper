@@ -51,7 +51,7 @@ class SoundcloudMappingUtils:
     @staticmethod
     def build_profile_url(user_data):
         if "permalink_url" in user_data:
-            return user_data["permalink_url"]
+            return user_data.get("permalink_url", "")
         elif "permalink" in user_data:
             permalink = user_data.get("permalink", "")
             if permalink:
@@ -86,8 +86,8 @@ class SoundcloudMappingUtils:
 
         for item in user_data:
             if "url" in item and "network" in item:
-                network = item["network"]
-                url = item["url"]
+                network = item.get("network", "")
+                url = item.get("url", "")
                 # Convertir 'personal' en 'website'
                 if network == "personal":
                     network = "website"
