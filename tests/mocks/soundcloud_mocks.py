@@ -1,10 +1,7 @@
-"""
-Mocks pour les tests des scrapers SoundCloud.
-"""
 import pytest
+
 from app.models import SocialLink
 from tests.mocks.http_mocks import mock_http_response_factory
-
 
 # Réutiliser le mock de réponse HTTP générique
 mock_response_factory = mock_http_response_factory
@@ -92,4 +89,4 @@ def mock_social_links():
         SocialLink(platform="facebook", url="https://facebook.com/test_user"),
         SocialLink(platform="instagram", url="https://instagram.com/test_user"),
         SocialLink(platform="website", url="https://example.com")
-    ] 
+    ]

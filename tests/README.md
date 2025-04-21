@@ -9,19 +9,33 @@ Les tests sont organisés de façon similaire à la structure du code de l'appli
 ```
 tests/
 ├── conftest.py          # Configuration globale et fixtures partagées
-├── mocks/               # Mocks réutilisables pour les tests
-├── scrapers/            # Tests pour les scrapers
+├── integration/         # Tests d'intégration
+│   ├── mocks/           # Mocks spécifiques aux tests d'intégration
+│   ├── test_api_routes.py  # Tests des routes API générales
+│   └── test_soundcloud_router.py  # Tests des routes Soundcloud
+├── mocks/               # Mocks réutilisables pour les tests unitaires
+├── scrapers/            # Tests unitaires pour les scrapers
 │   ├── soundcloud/      # Tests spécifiques pour SoundCloud
 │   ├── beatport/        # Tests spécifiques pour Beatport 
 │   └── ...              # Tests pour d'autres scrapers
-└── services/            # Tests pour les services génériques
+└── services/            # Tests unitaires pour les services génériques
     ├── test_retry_service.py  # Tests pour le service de retry
     └── ...              # Tests pour d'autres services
 ```
 
+## Types de tests
+
+### Tests unitaires
+
+Les tests unitaires vérifient le comportement isolé de chaque composant de l'application, comme les scrapers individuels ou les services utilitaires. Ils utilisent des mocks pour remplacer les dépendances externes.
+
+### Tests d'intégration
+
+Les tests d'intégration vérifient que les différentes parties de l'application fonctionnent correctement ensemble, en se concentrant sur les points d'interaction entre les composants. Ils utilisent `TestClient` de FastAPI pour simuler des requêtes HTTP vers l'API et des mocks pour simuler les réponses des services externes.
+
 ## Exécution des tests
 
-Pour exécuter les tests, utilisez le script fourni dans le répertoire `scripts` :
+Pour exécuter tous les tests :
 
 ```bash
 # Sur Windows
@@ -29,6 +43,28 @@ Pour exécuter les tests, utilisez le script fourni dans le répertoire `scripts
 
 # Sur Linux/MacOS
 ./scripts/run_tests.sh
+```
+
+Pour exécuter uniquement les tests unitaires :
+
+```bash
+pytest -v tests/scrapers/ tests/services/
+```
+
+Pour exécuter uniquement les tests d'intégration :
+
+```bash
+pytest -v tests/integration/
+```
+
+Pour exécuter les tests avec couverture de code :
+
+```bash
+# Tous les tests avec couverture
+pytest -v --cov=app tests/
+
+# Tests d'intégration avec couverture
+pytest -v --cov=app.routers tests/integration/
 ```
 
 ## Mocks et fixtures
@@ -39,7 +75,7 @@ Le projet utilise des mocks réutilisables pour faciliter les tests :
 - Les mocks des modèles : pour générer des objets de données standardisés
 - Les fixtures spécifiques aux services : pour configurer les environnements de test
 
-Ces mocks sont définis dans le répertoire `tests/mocks/` et sont réutilisés à travers les différents tests.
+Ces mocks sont définis dans les répertoires `tests/mocks/` (tests unitaires) et `tests/integration/mocks/` (tests d'intégration) et sont réutilisés à travers les différents tests.
 
 ## Tests asynchrones
 
@@ -62,6 +98,7 @@ async def test_async_function(self, mock_method):
 - Les noms des fichiers de test commencent par `test_`
 - Les classes de test commencent par `Test`
 - Les méthodes de test commencent par `test_`
+- Dans les tests d'intégration, les fixtures et méthodes de test n'utilisent pas de suffixe `_integration` pour rester concis et lisibles
 
 ## Bonnes pratiques
 
@@ -75,6 +112,16 @@ async def test_async_function(self, mock_method):
 
 Le rapport de couverture de code est généré automatiquement lors de l'exécution des tests. 
 Les résultats sont affichés dans la console et peuvent être consultés en détail.
+
+## Tests d'API
+
+Les tests d'intégration des API (`tests/integration/`) vérifient que les routes API fonctionnent correctement de bout en bout :
+
+- Validation des entrées et sorties conformes aux modèles Pydantic
+- Gestion correcte des erreurs et des cas limites
+- Intégration des middlewares (authentification, logging, etc.)
+
+Pour les tests d'API, nous utilisons `TestClient` de FastAPI qui permet de faire des requêtes HTTP simulées sans serveur réel.
 
 ## Services
 

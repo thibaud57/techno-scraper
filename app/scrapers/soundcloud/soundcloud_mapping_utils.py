@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Optional
 
 try:
     import pycountry
-
     PYCOUNTRY_AVAILABLE = True
 except ImportError:
     PYCOUNTRY_AVAILABLE = False
@@ -98,10 +97,3 @@ class SoundcloudMappingUtils:
                     social_links.append(social_link)
 
         return social_links
-
-    @staticmethod
-    def extract_tracks(user_data: Dict[str, Any]) -> Optional[List[Track]]:
-        # Cette méthode est un placeholder
-        # Dans une implémentation réelle, il faudrait faire une requête supplémentaire
-        # pour récupérer les tracks de l'utilisateur
-        return None
