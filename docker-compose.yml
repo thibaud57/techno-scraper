@@ -4,9 +4,7 @@ networks:
 
 services:
     techno-scraper:
-        build:
-            context: .
-            dockerfile: Dockerfile
+        image: ghcr.io/${GITHUB_REPOSITORY}:latest
         container_name: techno-scraper
         restart: unless-stopped
         ports:
@@ -26,9 +24,7 @@ services:
 
     # Service pour exécuter les tests
     tests:
-        build:
-            context: .
-            dockerfile: Dockerfile
+        image: ghcr.io/${GITHUB_REPOSITORY}:latest
         container_name: techno-scraper-tests
         command: pytest -v --cov=app tests/
         volumes:
