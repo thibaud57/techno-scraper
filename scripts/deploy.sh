@@ -11,6 +11,9 @@ if [ -z "$GITHUB_TOKEN" ] || [ -z "$GITHUB_ACTOR" ] || [ -z "$GITHUB_REPOSITORY"
     exit 1
 fi
 
+echo "Création du réseau 'my_network' si nécessaire..."
+docker network create my_network 2>/dev/null || echo "Le réseau 'my_network' existe déjà."
+
 echo "Début du déploiement..."
 
 # Se connecter à GitHub Container Registry
