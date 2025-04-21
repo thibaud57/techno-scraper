@@ -12,6 +12,11 @@ on:
         description: "Tag complet de l'image construite"
         value: ${{ jobs.build.outputs.image_tag }}
 
+# Ajouter les permissions nécessaires
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
