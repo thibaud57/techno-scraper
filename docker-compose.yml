@@ -1,7 +1,3 @@
-networks:
-    my_network:
-        external: true
-
 services:
     techno-scraper:
         image: ghcr.io/${GITHUB_REPOSITORY}:latest
@@ -31,3 +27,7 @@ services:
             - LOG_LEVEL=DEBUG
         networks:
             - my_network
+            
+networks:
+    my_network:
+        external: true
