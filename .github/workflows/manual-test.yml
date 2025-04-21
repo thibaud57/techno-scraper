@@ -1,0 +1,45 @@
+name: Manual Test Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      coverage_report:
+        description: 'Générer un rapport de couverture détaillé'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+            python-version: '3.13'
+            
+      - name: Install dependencies
+        run: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+            pip install -r requirements-test.txt
+            
+      - name: Run tests
+        run: |
+            pytest -v --cov=app tests/
+            
+      - name: Generate detailed coverage report
+        if: ${{ inputs.coverage_report == true }}
+        run: |
+            pytest --cov=app --cov-report=html tests/
+            
+      - name: Archive coverage report
+        if: ${{ inputs.coverage_report == true }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: htmlcov/
+          retention-days: 5 

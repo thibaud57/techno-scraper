@@ -14,6 +14,15 @@ fi
 # Répertoire du projet sur le VPS
 PROJECT_DIR="~/techno-scraper"
 
+# Exécuter les tests avant le déploiement
+echo "Exécution des tests..."
+docker-compose run --rm tests
+if [ $? -ne 0 ]; then
+    echo "Erreur: Les tests ont échoué. Déploiement annulé."
+    exit 1
+fi
+echo "Tests réussis! Début du déploiement..."
+
 # Créer le répertoire du projet s'il n'existe pas
 ssh -i "$SSH_PRIVATE_KEY" "$SSH_USERNAME@$SSH_HOST" "mkdir -p $PROJECT_DIR"
 

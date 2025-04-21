@@ -30,3 +30,20 @@ services:
             timeout: 10s
             retries: 3
             start_period: 5s
+
+    # Service pour exécuter les tests
+    tests:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: techno-scraper-tests
+        command: pytest -v --cov=app tests/
+        volumes:
+            - ./app:/app/app
+            - ./tests:/app/tests
+        environment:
+            - DEBUG=True
+            - API_KEY=test-key
+            - LOG_LEVEL=DEBUG
+        networks:
+            - my_network
