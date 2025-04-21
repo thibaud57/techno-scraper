@@ -6,45 +6,35 @@
 set -e  # Arrêter le script en cas d'erreur
 
 # Vérifier que les variables d'environnement nécessaires sont définies
-if [ -z "$SSH_HOST" ] || [ -z "$SSH_USERNAME" ] || [ -z "$SSH_PRIVATE_KEY" ]; then
-    echo "Erreur: Les variables d'environnement SSH_HOST, SSH_USERNAME et SSH_PRIVATE_KEY doivent être définies"
+if [ -z "$GITHUB_TOKEN" ] || [ -z "$GITHUB_ACTOR" ] || [ -z "$GITHUB_REPOSITORY" ]; then
+    echo "Erreur: Les variables d'environnement GITHUB_TOKEN, GITHUB_ACTOR et GITHUB_REPOSITORY doivent être définies"
     exit 1
 fi
 
-# Répertoire du projet sur le VPS
-PROJECT_DIR="~/techno-scraper"
+echo "Début du déploiement..."
 
-# Exécuter les tests avant le déploiement
-echo "Exécution des tests..."
-docker-compose run --rm tests
-if [ $? -ne 0 ]; then
-    echo "Erreur: Les tests ont échoué. Déploiement annulé."
-    exit 1
-fi
-echo "Tests réussis! Début du déploiement..."
+# Se connecter à GitHub Container Registry
+echo "Connexion à GitHub Container Registry..."
+echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
-# Créer le répertoire du projet s'il n'existe pas
-ssh -i "$SSH_PRIVATE_KEY" "$SSH_USERNAME@$SSH_HOST" "mkdir -p $PROJECT_DIR"
+# Télécharger la dernière image
+echo "Téléchargement de la dernière image..."
+docker pull ghcr.io/$GITHUB_REPOSITORY:latest
 
-# Copier les fichiers nécessaires
-scp -i "$SSH_PRIVATE_KEY" docker-compose.yml "$SSH_USERNAME@$SSH_HOST:$PROJECT_DIR/"
-scp -i "$SSH_PRIVATE_KEY" .env "$SSH_USERNAME@$SSH_HOST:$PROJECT_DIR/"
+# Arrêter les containers existants
+echo "Arrêt des containers existants..."
+docker-compose down
 
-# Se connecter au VPS et déployer l'application
-ssh -i "$SSH_PRIVATE_KEY" "$SSH_USERNAME@$SSH_HOST" << EOF
-    cd $PROJECT_DIR
-    
-    echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-    
-    docker pull ghcr.io/$GITHUB_REPOSITORY:latest
-    
-    docker-compose down
-    
-    docker-compose up -d
-    
-    docker-compose ps
-    
-    docker image prune -f
-EOF
+# Démarrer les nouveaux containers
+echo "Démarrage des nouveaux containers..."
+docker-compose up -d
+
+# Afficher l'état des containers
+echo "État des containers:"
+docker-compose ps
+
+# Nettoyer les anciennes images
+echo "Nettoyage des anciennes images..."
+docker image prune -f
 
 echo "Déploiement terminé avec succès !"

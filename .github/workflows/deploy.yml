@@ -49,23 +49,23 @@ jobs:
                       # Créer ou mettre à jour le fichier .env
                       cat > .env << EOL
                       # Configuration de l'application
-                      DEBUG=False
+                      DEBUG=${{ vars.DEBUG }}
                       API_KEY=${{ secrets.API_KEY }}
 
                       # Configuration du serveur
-                      HOST=0.0.0.0
-                      PORT=8000
+                      HOST=${{ vars.HOST }}
+                      PORT=${{ vars.PORT }}
 
                       # Configuration des logs
-                      LOG_LEVEL=INFO
+                      LOG_LEVEL=${{ vars.LOG_LEVEL }}
 
                       # Configuration des retries
-                      MAX_RETRIES=3
-                      RETRY_BACKOFF_FACTOR=0.5
-                      REQUEST_TIMEOUT=30
+                      MAX_RETRIES=${{ vars.MAX_RETRIES }}
+                      RETRY_BACKOFF_FACTOR=${{ vars.RETRY_BACKOFF_FACTOR }}
+                      REQUEST_TIMEOUT=${{ vars.REQUEST_TIMEOUT }}
 
                       # User-Agent (optionnel, "random" pour générer aléatoirement)
-                      USER_AGENT=random
+                      USER_AGENT=${{ vars.USER_AGENT }}
                       EOL
 
                       # Rendre le script de déploiement exécutable
