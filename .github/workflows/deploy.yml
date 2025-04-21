@@ -20,74 +20,61 @@ jobs:
         runs-on: ubuntu-latest
         needs: build
         steps:
-            - name: Deploy to VPS
-              uses: appleboy/ssh-action@master
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Copy configuration files to VPS
+              uses: appleboy/scp-action@v0.1.7
               with:
                   host: ${{ secrets.SSH_HOST }}
                   username: ${{ secrets.SSH_USERNAME }}
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
                   port: ${{ secrets.SSH_PORT }}
-                  script: |
-                      # Créer le répertoire du projet s'il n'existe pas
-                      mkdir -p ~/techno-scraper
+                  source: "docker-compose.yml,scripts/deploy.sh"
+                  target: "~/techno-scraper"
+                  overwrite: true
 
+            - name: Configure environment and deploy
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SSH_HOST }}
+                  username: ${{ secrets.SSH_USERNAME }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  port: ${{ secrets.SSH_PORT }}
+                  envs: API_KEY,GITHUB_TOKEN,GITHUB_ACTOR,GITHUB_REPOSITORY
+                  script: |
                       # Aller dans le répertoire du projet
                       cd ~/techno-scraper
 
                       # Créer ou mettre à jour le fichier .env
                       cat > .env << EOL
+                      # Configuration de l'application
                       DEBUG=False
                       API_KEY=${{ secrets.API_KEY }}
+
+                      # Configuration du serveur
                       HOST=0.0.0.0
                       PORT=8000
+
+                      # Configuration des logs
                       LOG_LEVEL=INFO
+
+                      # Configuration des retries
                       MAX_RETRIES=3
                       RETRY_BACKOFF_FACTOR=0.5
                       REQUEST_TIMEOUT=30
+
+                      # User-Agent (optionnel, "random" pour générer aléatoirement)
                       USER_AGENT=random
                       EOL
 
-                      # Créer ou mettre à jour le fichier docker-compose.yml
-                      cat > docker-compose.yml << EOL
-                      version: "3.8"
-
-                      networks:
-                        my_network:
-                          driver: bridge
-
-                      services:
-                        techno-scraper:
-                          image: ghcr.io/${{ github.repository }}:latest
-                          container_name: techno-scraper
-                          restart: unless-stopped
-                          ports:
-                            - "127.0.0.1:8000:8000"
-                          env_file:
-                            - .env
-                          networks:
-                            - my_network
-                          healthcheck:
-                            test: ["CMD", "curl", "-f", "http://localhost:8000/status"]
-                            interval: 30s
-                            timeout: 10s
-                            retries: 3
-                            start_period: 5s
-                      EOL
-
-                      # Se connecter au GitHub Container Registry
-                      echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-                      # Tirer la dernière image
-                      docker pull ghcr.io/${{ github.repository }}:latest
-
-                      # Arrêter et supprimer les conteneurs existants
-                      docker-compose down
-
-                      # Démarrer les nouveaux conteneurs
-                      docker-compose up -d
-
-                      # Vérifier que les conteneurs sont en cours d'exécution
-                      docker-compose ps
-
-                      # Nettoyer les images non utilisées
-                      docker image prune -f
+                      # Rendre le script de déploiement exécutable
+                      chmod +x scripts/deploy.sh
+                      
+                      # Définir les variables pour le script de déploiement
+                      export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+                      export GITHUB_ACTOR=${{ github.actor }}
+                      export GITHUB_REPOSITORY=${{ github.repository }}
+                      
+                      # Exécuter le script de déploiement
+                      ./scripts/deploy.sh
