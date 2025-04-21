@@ -55,19 +55,37 @@ techno-scraper/
 ├── tests/                       # Tests unitaires et d'intégration
 │   ├── __init__.py
 │   ├── conftest.py              # Configuration des tests
-│   ├── test_soundcloud.py
-│   └── ...
+│   ├── integration/             # Tests d'intégration
+│   │   ├── mocks/               # Mocks pour les tests d'intégration
+│   │   ├── test_api_routes.py   # Tests des routes API générales
+│   │   └── test_soundcloud_router.py # Tests des routes Soundcloud
+│   ├── mocks/                   # Mocks réutilisables
+│   ├── scrapers/                # Tests unitaires des scrapers
+│   │   ├── soundcloud/          # Tests pour Soundcloud
+│   │   ├── beatport/            # Tests pour Beatport
+│   │   └── ...                  # Tests pour autres scrapers
+│   └── services/                # Tests des services
+│       ├── test_retry_service.py # Tests du service de retry
+│       └── ...
 ├── .github/                     # Configuration GitHub
 │   └── workflows/               # Workflows GitHub Actions
-│       └── deploy.yml           # Workflow de déploiement
+│       ├── deploy.yml           # Workflow de déploiement principal
+│       ├── build.yml            # Workflow de construction d'image Docker
+│       ├── test.yml             # Workflow d'exécution des tests
+│       └── manual-test.yml      # Workflow pour tests manuels
 ├── scripts/                     # Scripts utilitaires
-│   └── deploy.sh                # Script de déploiement pour GitHub Actions
-│   └── setup_venv.bat & .sh     # Script de config venv en local
+│   ├── deploy.sh                # Script de déploiement pour GitHub Actions
+│   ├── setup_venv.bat           # Script de config venv en local (Windows)
+│   ├── setup_venv.sh            # Script de config venv en local (Linux/macOS)
+│   ├── run_tests.bat            # Script d'exécution des tests (Windows)
+│   └── run_tests.sh             # Script d'exécution des tests (Linux/macOS)
 ├── .env.example                 # Exemple de variables d'environnement
 ├── .gitignore                   # Fichiers à ignorer par Git
 ├── Dockerfile                   # Configuration Docker
 ├── docker-compose.yml           # Configuration Docker Compose
-├── requirements.txt             # Dépendances Python
+├── requirements.txt             # Dépendances Python principales
+├── requirements-test.txt        # Dépendances pour les tests
+├── pytest.ini                   # Configuration pytest
 └── README.md                    # Documentation du projet
 ```
 
@@ -106,8 +124,9 @@ graph TD
 
     subgraph "CI/CD Pipeline"
         GitHub[GitHub Repository] -->|Trigger| Actions[GitHub Actions]
-        Actions -->|Build| DockerImage[Docker Image]
-        DockerImage -->|Push| Registry[GitHub Container Registry]
+        Actions -->|CI| Tests[Run Tests]
+        Tests -->|Success| Build[Build Docker Image]
+        Build -->|Push| Registry[GitHub Container Registry]
         Registry -->|Pull| VPS[VPS Deployment]
     end
 ```
@@ -151,13 +170,14 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    A[Push sur GitHub] --> B[Déclenchement du workflow GitHub Actions]
-    B --> C[Construction de l'image Docker]
-    C --> D[Tests automatisés]
-    D --> E[Publication de l'image sur GitHub Container Registry]
-    E --> F[Connexion SSH au VPS]
-    F --> G[Déploiement via Docker Compose]
-    G --> H[Vérification du déploiement]
+    A[Push sur GitHub] --> B[Déclenchement du workflow deploy.yml]
+    B --> C[Exécution des tests via test.yml]
+    C -->|Échec| D[Notification d'échec]
+    C -->|Succès| E[Construction de l'image via build.yml]
+    E --> F[Publication de l'image sur GitHub Container Registry]
+    F --> G[Connexion SSH au VPS]
+    G --> H[Déploiement via Docker Compose]
+    H --> I[Vérification du déploiement]
 ```
 
 ## Détails des composants principaux
@@ -178,14 +198,25 @@ flowchart TD
 -   **scrapers/base.py**: Classe de base avec fonctionnalités communes
 -   Scrapers spécifiques à chaque site, organisés par fonctionnalité
 
-### 4. Configuration Docker
+### 4. Test Layer
+
+-   **tests/conftest.py**: Configuration globale et fixtures partagées
+-   **tests/integration/**: Tests d'intégration des API et endpoints
+-   **tests/scrapers/**: Tests unitaires pour les scrapers
+-   **tests/services/**: Tests unitaires pour les services
+-   **tests/mocks/**: Mocks réutilisables pour simuler les réponses externes
+
+### 5. Configuration Docker
 
 -   **Dockerfile**: Image Docker légère basée sur Python
 -   **docker-compose.yml**: Configuration pour le déploiement local et en production
 
-### 5. CI/CD avec GitHub Actions
+### 6. CI/CD avec GitHub Actions
 
--   **.github/workflows/deploy.yml**: Workflow de déploiement automatique
+-   **.github/workflows/deploy.yml**: Workflow principal orchestrant le déploiement complet
+-   **.github/workflows/test.yml**: Workflow d'exécution des tests et de génération de rapports de couverture
+-   **.github/workflows/build.yml**: Workflow de construction et publication d'image Docker
+-   **.github/workflows/manual-test.yml**: Workflow pour exécution manuelle des tests
 -   **scripts/deploy.sh**: Script de déploiement sur le VPS
 
 ## Sécurité
@@ -200,9 +231,19 @@ flowchart TD
 -   Erreurs explicites détaillées pour faciliter le débogage
 -   Logging complet des erreurs et des tentatives
 
+## Tests
+
+-   **Tests unitaires**: Validation des composants individuels
+    -   Scrapers: Tests de l'extraction et de la transformation des données
+    -   Services: Tests de la logique métier et des retries
+-   **Tests d'intégration**: Validation des interactions entre composants
+    -   API: Tests des endpoints, validation des entrées/sorties
+    -   Workflows: Tests des scénarios de bout en bout
+-   **Mocks**: Simulation des API externes pour des tests reproductibles
+
 ## Prochaines étapes
 
-1. Implémentation des fichiers de base
-2. Configuration de l'environnement Docker
-3. Mise en place du CI/CD avec GitHub Actions
-4. Développement des scrapers spécifiques à chaque site
+1. Implémentation des scrapers restants
+2. Amélioration de la documentation API
+3. Mise en place du monitoring
+4. Optimisations de performance (cache, parallélisation)

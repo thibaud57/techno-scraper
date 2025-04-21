@@ -2,7 +2,7 @@
 
 Ce document résume l'état actuel du projet, les fonctionnalités implémentées, et les prochaines étapes prévues.
 
-## État actuel du projet (19/04/2025)
+## État actuel du projet (21/04/2025)
 
 Le projet techno-scraper est une API FastAPI conçue pour scraper des données de différents sites liés à la musique techno (Soundcloud, Beatport, Bandcamp, Facebook, Instagram, Songstats). L'API est destinée à être utilisée par n8n pour automatiser des workflows de récupération de données.
 
@@ -12,6 +12,7 @@ Le projet techno-scraper est une API FastAPI conçue pour scraper des données d
 -   Configuration Docker pour le développement local et le déploiement
 -   Configuration GitHub Actions pour le déploiement automatique sur VPS
 -   Scripts utilitaires pour le développement local
+-   Suite complète de tests unitaires et d'intégration
 
 ### Fonctionnalités implémentées
 
@@ -25,8 +26,27 @@ Le projet techno-scraper est une API FastAPI conçue pour scraper des données d
     - Recherche de profils
     - Profil (par ID)
     - Réseaux sociaux
+-   Infrastructure de tests
+    - Tests unitaires pour tous les scrapers
+    - Tests d'intégration des endpoints API
+    - Mocks pour les réponses externes
 
-### Modifications récentes (19/04/2025)
+### Modifications récentes (21/04/2025)
+
+-   Implémentation des tests unitaires et d'intégration
+    - Tests unitaires pour tous les scrapers (notamment SoundCloud)
+    - Tests d'intégration couvrant tous les endpoints de l'API
+    - Configuration des mocks pour simuler les réponses des API externes
+    - Amélioration de la testabilité du code avec l'injection de dépendances
+-   Optimisation des scripts et workflows GitHub
+    - Correction et amélioration des workflows GitHub Actions
+    - Configuration des workflows deploy.yml, build.yml et test.yml
+    - Automatisation des tests pour chaque pull request
+    - Configuration du déploiement continu sur le VPS
+    - Ajout de la génération automatique de rapports de couverture de code
+    - Intégration d'un linter et de vérifications de qualité de code
+
+### Modifications précédentes (19/04/2025)
 
 -   Optimisation majeure des scrapers Soundcloud avec requêtes concurrentes
 -   Implémentation de l'extraction des réseaux sociaux via l'API web-profiles
@@ -47,6 +67,8 @@ Le projet techno-scraper est une API FastAPI conçue pour scraper des données d
 -   Simplification de l'interface de l'API pour une utilisation plus intuitive
 -   Optimisation de la récupération des réseaux sociaux avec des requêtes concurrentes
 -   Meilleur mappage des types de réseaux sociaux aux plateformes standardisées
+-   Correction des scripts de déploiement pour une meilleure stabilité
+-   Résolution de problèmes d'intégration continue dans les workflows GitHub
 
 ## Intégration API SoundCloud
 
@@ -82,6 +104,36 @@ Pour obtenir un profil SoundCloud complet avec ses réseaux sociaux :
 2. Les profils retournés incluent déjà leurs réseaux sociaux grâce à l'optimisation concurrente
 3. Alternativement, utiliser directement l'endpoint profil avec un ID pour obtenir un profil spécifique
 
+## Tests du projet
+
+### Types de tests
+
+- **Tests unitaires** : Couvrent les fonctionnalités individuelles des scrapers et services
+  - Tests des méthodes de récupération et de transformation des données
+  - Validation des modèles de données
+  - Tests des mécanismes de retries
+
+- **Tests d'intégration** : Vérifient l'interaction entre les différents composants
+  - Tests des endpoints API complets
+  - Validation des réponses API
+  - Scénarios de bout en bout
+
+### Exécution des tests
+
+```bash
+# Exécuter tous les tests
+pytest
+
+# Exécuter avec rapport de couverture
+pytest --cov=app
+
+# Exécuter uniquement les tests unitaires
+pytest tests/unit
+
+# Exécuter uniquement les tests d'intégration
+pytest tests/integration
+```
+
 ## Prochaines étapes
 
 ### Priorité haute
@@ -98,10 +150,6 @@ Pour obtenir un profil SoundCloud complet avec ses réseaux sociaux :
 
     - Logging plus détaillé
     - Mécanismes de retry plus sophistiqués
-
-3. **Tests** :
-    - Tests unitaires pour les scrapers
-    - Tests d'intégration pour les endpoints API
 
 ### Priorité moyenne
 
@@ -124,19 +172,50 @@ Pour obtenir un profil SoundCloud complet avec ses réseaux sociaux :
 
 1. **Développement local** :
 
-    ```
+    ```bash
     setup_venv.bat  # ou ./setup_venv.sh sur Linux/macOS
     ```
 
-2. **Test avec Docker** :
+2. **Exécution des tests locaux** :
 
+    ```bash
+    # Lancer tous les tests
+    pytest
+    
+    # Lancer les tests avec rapport de couverture
+    pytest --cov=app
     ```
+
+3. **Test avec Docker** :
+
+    ```bash
     docker-compose up -d
     ```
 
-3. **Déploiement** :
-    - Push sur GitHub
-    - GitHub Actions déploie automatiquement sur le VPS
+4. **Déploiement** :
+    - Push sur GitHub (branche master)
+    - GitHub Actions exécute workflow deploy.yml qui déclenche:
+      - test.yml pour les tests et le linting
+      - build.yml pour la construction de l'image
+    - Si tous les tests passent, déploiement automatique sur le VPS
+
+## Intégration continue
+
+Le projet utilise GitHub Actions pour l'automatisation des tests et du déploiement :
+
+- **Workflow test.yml** : Exécute les tests et vérifications à chaque pull request
+  - Exécution des tests unitaires et d'intégration
+  - Génération de rapports de couverture de code
+  - Peut être exécuté manuellement via manual-test.yml
+
+- **Workflow build.yml** : Construction de l'image Docker
+  - Construction de l'image Docker avec méta-données
+  - Publication sur GitHub Container Registry
+
+- **Workflow deploy.yml** : Orchestration du déploiement complet
+  - Déclenché par un push sur la branche master
+  - Appelle test.yml puis build.yml
+  - Déploie sur le VPS via SSH si les étapes précédentes réussissent
 
 ## Notes techniques
 
@@ -148,6 +227,8 @@ Pour obtenir un profil SoundCloud complet avec ses réseaux sociaux :
 -   Les erreurs de l'API SoundCloud sont gérées via les codes HTTP standards (400, 401, 403, etc.)
 -   Les scrapers utilisent asyncio pour exécuter des requêtes en parallèle et améliorer les performances
 -   Les profils et leurs réseaux sociaux sont récupérés simultanément grâce à l'exécution concurrente
+-   Les tests utilisent pytest-mock et pytest-httpx pour simuler les requêtes externes
+-   L'intégration continue garantit la qualité du code avant chaque déploiement
 
 ## Ressources
 
@@ -155,3 +236,5 @@ Pour obtenir un profil SoundCloud complet avec ses réseaux sociaux :
 -   [Documentation FastAPI](https://fastapi.tiangolo.com/)
 -   [Documentation n8n](https://docs.n8n.io/)
 -   [Documentation API SoundCloud](https://developers.soundcloud.com/docs/api/guide)
+-   [Documentation pytest](https://docs.pytest.org/)
+-   [GitHub Actions](https://docs.github.com/en/actions)

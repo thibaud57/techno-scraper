@@ -26,6 +26,7 @@ Techno-scraper est une API FastAPI qui permet de récupérer des données de dif
 -   [HTTPX](https://www.python-httpx.org/) - Client HTTP asynchrone
 -   [Pydantic](https://pydantic-docs.helpmanual.io/) - Validation de données
 -   [asyncio](https://docs.python.org/3/library/asyncio.html) - Programmation asynchrone pour requêtes concurrentes
+-   [pytest](https://docs.pytest.org/) - Framework de test
 -   [Docker](https://www.docker.com/) - Conteneurisation
 -   [GitHub Actions](https://github.com/features/actions) - CI/CD
 
@@ -96,11 +97,46 @@ curl -X GET "http://localhost:8000/api/soundcloud/profile/123456" -H "X-API-Key:
 
 ## 🧪 Tests
 
-Pour exécuter les tests :
+Le projet dispose d'une suite complète de tests unitaires et d'intégration. Pour plus de détails, consultez le [README.md des tests](tests/README.md).
+
+Pour exécuter tous les tests :
 
 ```bash
+# Sur Windows
+.\scripts\run_tests.bat
+
+# Sur Linux/MacOS
+./scripts/run_tests.sh
+
+# Avec Docker
 docker-compose run --rm techno-scraper pytest
 ```
+
+Pour exécuter les tests avec couverture de code :
+
+```bash
+pytest --cov=app
+```
+
+## 🔄 Intégration continue
+
+Le projet utilise GitHub Actions pour l'automatisation des tests et du déploiement :
+
+- **Workflow test.yml** : Exécuté automatiquement lors des pull requests
+  - Exécution des tests unitaires et d'intégration
+  - Génération de rapports de couverture de code
+  - Peut être déclenché manuellement via manual-test.yml
+
+- **Workflow build.yml** : Construction de l'image Docker
+  - Construction de l'image avec tags appropriés
+  - Publication sur GitHub Container Registry
+
+- **Workflow deploy.yml** : Orchestration du déploiement complet
+  - Déclenché par un push sur la branche master
+  - Appelle test.yml puis build.yml en séquence
+  - Déploie sur le VPS via SSH si les étapes précédentes réussissent
+
+Pour plus de détails sur les workflows, consultez le dossier `.github/workflows/`.
 
 ## 📁 Structure du projet
 
@@ -112,7 +148,12 @@ techno-scraper/
 │   ├── routers/              # Endpoints API
 │   ├── services/             # Services
 │   └── scrapers/             # Modules de scraping
-├── tests/                    # Tests
+├── tests/                    # Tests unitaires et d'intégration
+│   ├── conftest.py           # Configuration des tests
+│   ├── integration/          # Tests d'intégration
+│   ├── mocks/                # Mocks pour les tests
+│   ├── scrapers/             # Tests des scrapers
+│   └── services/             # Tests des services
 ├── .github/                  # Configuration GitHub
 ├── scripts/                  # Scripts utilitaires
 ├── Dockerfile                # Configuration Docker
