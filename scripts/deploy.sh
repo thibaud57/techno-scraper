@@ -23,15 +23,15 @@ docker pull ghcr.io/$GITHUB_REPOSITORY:latest
 
 # Arrêter les containers existants
 echo "Arrêt des containers existants..."
-docker-compose down
+docker compose down
 
 # Démarrer les nouveaux containers
 echo "Démarrage des nouveaux containers..."
-docker-compose up -d
+docker compose up -d
 
 # Afficher l'état des containers
 echo "État des containers:"
-docker-compose ps
+docker compose ps
 
 # Nettoyer les anciennes images
 echo "Nettoyage des anciennes images..."
