@@ -3,16 +3,16 @@ from typing import List, Optional
 from pydantic import Field
 
 from app.models import ArtistProfile, Track, Pagination
-
-# Constantes pour l'API SoundCloud
-SOUNDCLOUD_BASE_URL = "https://soundcloud.com"
-SOUNDCLOUD_API_URL = "https://api-v2.soundcloud.com"
-SOUNDCLOUD_CLIENT_ID = "EjkRJG0BLNEZquRiPZYdNtJdyGtTuHdp"
+from app.models.social_link import SocialLink
 
 
 class SoundcloudProfile(ArtistProfile):
-    id: int
+    bio: Optional[str] = None
+    location: Optional[str] = None
+    followers_count: Optional[int] = None
     tracks: Optional[List[Track]] = None
+    social_links: Optional[List[SocialLink]] = None
+
 
 
 class SoundcloudSearchResult(Pagination):

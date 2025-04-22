@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class SoundcloudProfileScraper(BaseScraper):
+    """Scraper pour un profil Soundcloud"""
 
     async def scrape(self, user_id: int) -> SoundcloudProfile:
         logger.info(f"Récupération du profil par ID: {user_id}")

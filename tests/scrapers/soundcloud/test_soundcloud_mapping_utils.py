@@ -1,8 +1,7 @@
 from unittest.mock import patch
 
 from app.models import SoundcloudProfile, LimitEnum
-from app.models.soundcloud_models import SOUNDCLOUD_BASE_URL, SOUNDCLOUD_API_URL, SOUNDCLOUD_CLIENT_ID
-from app.scrapers.soundcloud.soundcloud_mapping_utils import SoundcloudMappingUtils
+from app.scrapers.soundcloud.soundcloud_mapping_utils import SOUNDCLOUD_API_URL, SOUNDCLOUD_BASE_URL, SOUNDCLOUD_CLIENT_ID, SoundcloudMappingUtils
 from tests.mocks.soundcloud_mocks import mock_social_links, mock_soundcloud_webprofiles_data
 
 

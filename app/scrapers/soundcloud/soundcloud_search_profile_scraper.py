@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class SoundcloudSearchProfileScraper(BaseScraper):
+    """Scraper pour la recherche sur Soundcloud"""
 
     async def scrape(self, name: str, page: int = 1, limit: LimitEnum = LimitEnum.TEN) -> SoundcloudSearchResult:
         logger.info(f"Recherche de profils pour: '{name}'")

@@ -7,11 +7,14 @@ try:
 except ImportError:
     PYCOUNTRY_AVAILABLE = False
 
-from app.models import SocialLink, SoundcloudProfile, Track, LimitEnum
-from app.models.soundcloud_models import SOUNDCLOUD_BASE_URL, SOUNDCLOUD_API_URL, SOUNDCLOUD_CLIENT_ID
+from app.models import LimitEnum, SocialLink, SoundcloudProfile, Track
 
 logger = logging.getLogger(__name__)
 
+# Constantes pour l'API SoundCloud
+SOUNDCLOUD_BASE_URL = "https://soundcloud.com"
+SOUNDCLOUD_API_URL = "https://api-v2.soundcloud.com"
+SOUNDCLOUD_CLIENT_ID = "EjkRJG0BLNEZquRiPZYdNtJdyGtTuHdp"
 
 class SoundcloudMappingUtils:
     """Utilitaires pour mapper les données SoundCloud vers nos modèles"""

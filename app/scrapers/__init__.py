@@ -3,3 +3,9 @@ from app.scrapers.soundcloud import (
     SoundcloudSearchProfileScraper,
     SoundcloudWebprofilesScraper
 )
+
+from app.scrapers.beatport import (
+    BeatportSearchScraper,
+    BeatportReleasesScraper,
+    BeatportMappingUtils
+)

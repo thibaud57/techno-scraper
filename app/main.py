@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.core.errors import ScraperException
 from app.models import ErrorResponse
-from app.routers import soundcloud_router
+from app.routers import soundcloud_router, beatport_router
 
 # Configuration du logger
 logging.basicConfig(
@@ -55,6 +55,7 @@ async def scraper_exception_handler(request: Request, exc: ScraperException):
 
 # Inclusion des routers
 app.include_router(soundcloud_router.router, prefix=settings.API_PREFIX)
+app.include_router(beatport_router.router, prefix=settings.API_PREFIX)
 
 
 # Route racine
