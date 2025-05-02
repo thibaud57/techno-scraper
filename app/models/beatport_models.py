@@ -13,6 +13,10 @@ class BeatportEntityType(Enum):
     TRACK = "track"
     LABEL = "label"
 
+class BeatportReleaseEntityType(str, Enum):
+    ARTIST = "artist"
+    LABEL = "label"
+
 
 class BeatportProfile(ArtistProfile):
     releases: Optional[List[Release]] = None

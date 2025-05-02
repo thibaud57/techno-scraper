@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
+
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.errors import (ParsingException, ResourceNotFoundException,
                              ScraperException)
 from app.core.security import get_api_key
 from app.models import (ErrorResponse, SoundcloudProfile, SoundcloudSearchResult,
-                       LimitEnum, SocialLink)
+                        LimitEnum, SocialLink)
 from app.scrapers import (
     SoundcloudProfileScraper,
     SoundcloudSearchProfileScraper,
@@ -127,4 +128,3 @@ async def get_profile_webprofiles(user_id: int):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erreur inattendue: {str(e)}",
         )
-

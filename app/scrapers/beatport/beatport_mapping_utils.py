@@ -29,8 +29,9 @@ class BeatportMappingUtils:
     def extract_artist(artist_data: Dict[str, Any]) -> ArtistProfile:
         """Extrait les données d'un profil d'artiste depuis les données JSON"""
         try:
-            artist_id = artist_data.get("artist_id", 0)
-            name = artist_data.get("artist_name", "")
+            # Deux formats: id/name ou artist_id/artist_name suivant la recherche ou release
+            artist_id = artist_data.get("id", artist_data.get("artist_id", 0))
+            name = artist_data.get("name", artist_data.get("artist_name", ""))
             slug = BeatportMappingUtils._build_slug(artist_data, name)
             url = BeatportMappingUtils.build_url(BeatportEntityType.ARTIST, slug, artist_id)
 
@@ -101,10 +102,13 @@ class BeatportMappingUtils:
     def extract_release(release_data: Dict[str, Any]) -> Release:
         """Extrait les données d'une release depuis les données JSON"""
         try:
-            release_id = release_data.get("release_id", 0)
-            title = release_data.get("release_name", "")
+            # Deux formats: id/name ou release_id/release_name suivant la recherche ou release
+            release_id = release_data.get("id", release_data.get("release_id", 0))
+            title = release_data.get("name", release_data.get("release_name", ""))
             slug = BeatportMappingUtils._build_slug(release_data, title)
             url = BeatportMappingUtils.build_url(BeatportEntityType.RELEASE, slug, release_id)
+            release_date = BeatportMappingUtils._extract_date(release_data)
+            track_count = release_data.get("track_count", 0)
 
             artwork_url = BeatportMappingUtils._extract_image_url(release_data, "release")
 
@@ -113,23 +117,15 @@ class BeatportMappingUtils:
             if "label" in release_data:
                 label = BeatportMappingUtils.extract_label(release_data["label"])
 
-            release_date = BeatportMappingUtils._extract_date(release_data)
-            genre = BeatportMappingUtils._extract_genre(release_data)
-
-            tracks = []
-            if "tracks" in release_data and isinstance(release_data["tracks"], list):
-                tracks = [BeatportMappingUtils.extract_track(track) for track in release_data["tracks"]]
-
             return Release(
                 id=release_id,
                 title=title,
                 url=url,
                 artwork_url=artwork_url,
                 release_date=release_date,
+                track_count=track_count,
                 label=label,
-                tracks=tracks,
                 artists=artists,
-                genre=genre
             )
         except Exception as e:
             logger.error(f"Erreur lors de l'extraction de la release: {str(e)}")
@@ -139,8 +135,9 @@ class BeatportMappingUtils:
     def extract_label(label_data: Dict[str, Any]) -> ArtistProfile:
         """Extrait les données d'un label depuis les données JSON"""
         try:
-            label_id = label_data.get("label_id", 0)
-            name = label_data.get("label_name", "")
+            # Deux formats: id/name ou label_id/label_name suivant la recherche ou release
+            label_id = label_data.get("id", label_data.get("label_id", 0))
+            name = label_data.get("name", label_data.get("label_name", ""))
             slug = BeatportMappingUtils._build_slug(label_data, name)
             url = BeatportMappingUtils.build_url(BeatportEntityType.LABEL, slug, label_id)
 
@@ -166,15 +163,26 @@ class BeatportMappingUtils:
 
     @staticmethod
     def _extract_image_url(data: Dict[str, Any], prefix: str) -> Optional[str]:
-        # Chercher d'abord l'URL statique
+        # Fonction utilitaire pour remplacer les placeholders
+        def replace_placeholders(url: str) -> str:
+            return url.replace("{w}", "500").replace("{h}", "500")
+            
+        # Vérifier d'abord la structure avec "image"
+        if "image" in data and isinstance(data["image"], dict):
+            if "dynamic_uri" in data["image"]:
+                return replace_placeholders(data["image"]["dynamic_uri"])
+            elif "uri" in data["image"]:
+                return data["image"]["uri"]
+        
+        # Sinon chercher l'URL statique
         image_key = f"{prefix}_image_uri"
         if image_key in data:
             return data.get(image_key)
 
-        # Sinon chercher l'URL dynamique et remplacer les placeholders
+        # Sinon chercher l'URL dynamique
         dynamic_key = f"{prefix}_image_dynamic_uri"
         if dynamic_key in data:
-            return data.get(dynamic_key).replace("{w}", "500").replace("{h}", "500")
+            return replace_placeholders(data.get(dynamic_key))
 
         return None
 

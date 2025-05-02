@@ -13,8 +13,11 @@ Techno-scraper est une API FastAPI qui permet de récupérer des données de dif
 - **Profil par id** : Extraction des données d'un profil en recherchant par son id
 - **Réseaux sociaux** : Récupération des liens vers les plateformes externes (Facebook, Instagram, Spotify, etc.)
 
+### Beatport
+- **Recherche** : Extraction de données pour les artistes, labels, releases et tracks
+- **Releases par artiste/label** : Récupération des sorties musicales d'un artiste ou d'un label avec filtrage par date et pagination
+
 ### À venir
-- **Beatport** : Recherche et profils d'artistes, releases
 - **Bandcamp** : Informations sur les artistes et leurs albums
 - **Facebook/Instagram** : Extraction de données des réseaux sociaux
 - **Songstats** : Récupération des statistiques de streaming

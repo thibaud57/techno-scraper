@@ -44,10 +44,12 @@ techno-scraper/
 │       │   ├── __init__.py
 │       │   ├── profile.py       # Scraping de profil
 │       │   └── search.py        # Scraping de recherche
+│       │   └── mapping_utils.py # Utilitaires de mapping des données Soundcloud
 │       ├── beatport/            # Scraper pour Beatport
 │       │   ├── __init__.py
 │       │   ├── search.py        # Scraping de recherche
-│       │   └── releases.py      # Scraping de releases
+│       │   ├── releases.py      # Scraping de releases (artistes/labels)
+│       │   └── mapping_utils.py # Utilitaires de mapping des données Beatport
 │       ├── bandcamp/            # Et ainsi de suite pour les autres sites...
 │       ├── facebook/
 │       ├── instagram/

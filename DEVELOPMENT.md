@@ -26,12 +26,27 @@ Le projet techno-scraper est une API FastAPI conçue pour scraper des données d
     - Recherche de profils
     - Profil (par ID)
     - Réseaux sociaux
+-   Scraper pour Beatport
+    - Recherche
+    - Releases (artiste/label)
 -   Infrastructure de tests
     - Tests unitaires pour tous les scrapers
     - Tests d'intégration des endpoints API
     - Mocks pour les réponses externes
 
-### Modifications récentes (22/04/2025)
+### Modifications récentes (02/05/2025)
+
+-   Amélioration du scraper Beatport releases
+    - Support des releases par artiste et par label dans un endpoint unifié
+    - Implémentation du filtrage par date avec format YYYY-MM-DD
+    - Support de la pagination côté serveur Beatport
+    - Extraction améliorée des métadonnées des releases (artwork, track_count)
+    - Adaptation flexible aux différentes structures de données JSON
+    - Support des URLs au format nouveau (id/name) et ancien (release_id/release_name)
+    - Optimisation du mapping des images avec une gestion unifiée des placeholders
+    - Extraction de données supplémentaires comme le nombre de tracks
+
+### Modifications précédentes (22/04/2025)
 
 -   Implémentation du scraper Beatport
     - Scraper de recherche avec filtrage par type d'entité (artistes, tracks, releases, labels)
@@ -156,8 +171,6 @@ pytest tests/integration
 
 1. **Implémentation des scrapers restants** :
 
-    - ✅ Beatport (recherche)
-    - Beatport (releases)
     - Bandcamp
     - Facebook
     - Instagram
