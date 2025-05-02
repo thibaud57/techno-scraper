@@ -55,29 +55,24 @@ class BeatportMappingUtils:
             title = track_data.get("track_name", "")
             slug = BeatportMappingUtils._build_slug(track_data, title)
             url = BeatportMappingUtils.build_url(BeatportEntityType.TRACK, slug, track_id)
+            release_date = BeatportMappingUtils._extract_date(track_data)
+            genre = BeatportMappingUtils._extract_genre(track_data)
+            bpm = track_data.get("bpm", None)
+            play_count = track_data.get("plays", None)
+            download_count = track_data.get("downloads", None)
 
             artwork_url = BeatportMappingUtils._extract_image_url(track_data, "track")
             # Si pas d'image de track, essayer l'image de la release associée
             if not artwork_url and "release" in track_data:
                 artwork_url = BeatportMappingUtils._extract_image_url(track_data["release"], "release")
 
-            artists, remixers = BeatportMappingUtils._extract_artists_and_remixers(track_data)
+            artists, _ = BeatportMappingUtils._extract_artists_and_remixers(track_data)
 
             labels = []
             if "label" in track_data and "label_name" in track_data["label"]:
                 labels = [BeatportMappingUtils.extract_label(track_data["label"])]
 
-            release_date = BeatportMappingUtils._extract_date(track_data)
-            genre = BeatportMappingUtils._extract_genre(track_data)
-            bpm = track_data.get("bpm", None)
-            key = None
-            if "key_name" in track_data:
-                key = track_data.get("key_name", None)
-            elif "key" in track_data and "key_name" in track_data["key"]:
-                key = track_data["key"].get("key_name", None)
-
-            play_count = track_data.get("plays", None)
-            download_count = track_data.get("downloads", None)
+            key = BeatportMappingUtils._extract_key(track_data)
 
             return Track(
                 id=track_id,
@@ -92,11 +87,11 @@ class BeatportMappingUtils:
                 key=key,
                 labels=labels,
                 artists=artists,
-                remixers=remixers
             )
         except Exception as e:
             logger.error(f"Erreur lors de l'extraction du track: {str(e)}")
             raise
+
 
     @staticmethod
     def extract_release(release_data: Dict[str, Any]) -> Release:
@@ -109,10 +104,11 @@ class BeatportMappingUtils:
             url = BeatportMappingUtils.build_url(BeatportEntityType.RELEASE, slug, release_id)
             release_date = BeatportMappingUtils._extract_date(release_data)
             track_count = release_data.get("track_count", 0)
+            catalog_code = release_data.get("catalog_number", None)
 
             artwork_url = BeatportMappingUtils._extract_image_url(release_data, "release")
 
-            artists, _ = BeatportMappingUtils._extract_artists_and_remixers(release_data)
+            artists, remixers = BeatportMappingUtils._extract_artists_and_remixers(release_data)
 
             if "label" in release_data:
                 label = BeatportMappingUtils.extract_label(release_data["label"])
@@ -124,6 +120,7 @@ class BeatportMappingUtils:
                 artwork_url=artwork_url,
                 release_date=release_date,
                 track_count=track_count,
+                catalog_code=catalog_code,
                 label=label,
                 artists=artists,
             )
@@ -217,3 +214,12 @@ class BeatportMappingUtils:
                     artists.append(artist_obj)
 
         return artists, remixers
+    
+    @staticmethod
+    def _extract_key(track_data):
+        key = None
+        if "key_name" in track_data:
+            key = track_data.get("key_name", None)
+        elif "key" in track_data and "key_name" in track_data["key"]:
+            key = track_data["key"].get("key_name", None)
+        return key
