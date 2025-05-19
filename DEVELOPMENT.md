@@ -2,7 +2,7 @@
 
 Ce document résume l'état actuel du projet, les fonctionnalités implémentées, et les prochaines étapes prévues.
 
-## État actuel du projet (21/04/2025)
+## État actuel du projet (19/05/2025)
 
 Le projet techno-scraper est une API FastAPI conçue pour scraper des données de différents sites liés à la musique techno (Soundcloud, Beatport, Bandcamp, Facebook, Instagram, Songstats). L'API est destinée à être utilisée par n8n pour automatiser des workflows de récupération de données.
 
@@ -34,7 +34,19 @@ Le projet techno-scraper est une API FastAPI conçue pour scraper des données d
     - Tests d'intégration des endpoints API
     - Mocks pour les réponses externes
 
-### Modifications récentes (02/05/2025)
+### Modifications récentes (19/05/2025)
+
+-   Refactorisation complète et unification de la logique de test
+    - Standardisation de l'approche des tests pour tous les scrapers
+    - Adoption d'un pattern décoratif uniforme avec `@patch` et `AsyncMock`
+    - Ajout de fixtures pour les scrapers, réduisant la duplication de code
+    - Implémentation complète des tests pour les scrapers Beatport (search et releases)
+    - Alignement de la logique de test entre les scrapers SoundCloud et Beatport
+    - Amélioration de la maintenabilité et de la lisibilité des tests
+    - Mise en place d'un pattern cohérent facilitant l'ajout de nouveaux scrapers
+    - Élimination du code boilerplate grâce aux fixtures et aux décorateurs
+
+### Modifications précédentes (02/05/2025)
 
 -   Amélioration du scraper Beatport releases
     - Support des releases par artiste et par label dans un endpoint unifié
@@ -148,6 +160,14 @@ Pour obtenir un profil SoundCloud complet avec ses réseaux sociaux :
   - Tests des endpoints API complets
   - Validation des réponses API
   - Scénarios de bout en bout
+
+### Pattern de test unifié
+
+Tous les tests de scrapers suivent désormais un pattern unifié :
+- Utilisation de fixtures pour instancier les scrapers
+- Utilisation de décorateurs `@patch` pour mocker les dépendances
+- Configuration des mocks via la valeur de retour (`mock_fetch.return_value`)
+- Structure cohérente pour tous les tests, facilitant la maintenance
 
 ### Exécution des tests
 

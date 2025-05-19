@@ -12,6 +12,7 @@ tests/
 ├── integration/         # Tests d'intégration
 │   ├── mocks/           # Mocks spécifiques aux tests d'intégration
 │   ├── test_api_routes.py  # Tests des routes API générales
+│   ├── test_beatport_router.py  # Tests des routes Beatport
 │   └── test_soundcloud_router.py  # Tests des routes Soundcloud
 ├── mocks/               # Mocks réutilisables pour les tests unitaires
 ├── scrapers/            # Tests unitaires pour les scrapers
@@ -67,6 +68,36 @@ pytest -v --cov=app tests/
 pytest -v --cov=app.routers tests/integration/
 ```
 
+## Structure et pattern de test
+
+Les tests suivent une structure cohérente à travers les différents modules :
+
+- Utilisation de fixtures pytest pour créer les instances de scrapers, réduisant la duplication de code
+- Utilisation de décorateurs `@patch` pour mocker les dépendances externes
+- Standardisation des entrées/sorties des tests pour faciliter les comparaisons
+- Tests pour les cas nominaux et les cas d'erreur
+
+### Pattern décoratif uniformisé
+
+Les tests pour les scrapers Beatport et SoundCloud suivent un pattern commun :
+
+```python
+@pytest.mark.asyncio
+@patch('app.scrapers.base_scraper.BaseScraper.fetch', new_callable=AsyncMock)
+async def test_example(self, mock_fetch, scraper, mock_factory):
+    # Configuration des mocks
+    mock_response = mock_factory(...)
+    mock_fetch.return_value = mock_response
+    
+    # Appel de la méthode sous test
+    result = await scraper.scrape(...)
+    
+    # Assertions
+    assert result...
+```
+
+Cette approche uniformisée facilite la maintenance et la compréhension du code.
+
 ## Mocks et fixtures
 
 Le projet utilise des mocks réutilisables pour faciliter les tests :
@@ -88,7 +119,7 @@ Exemple :
 ```python
 @pytest.mark.asyncio
 @patch('app.scrapers.some_module.SomeClass.some_method', new_callable=AsyncMock)
-async def test_async_function(self, mock_method):
+async def test_async_function(self, mock_method, scraper):
     mock_method.return_value = "some_result"
     # Test code here
 ```

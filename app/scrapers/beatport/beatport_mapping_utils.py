@@ -51,8 +51,9 @@ class BeatportMappingUtils:
     def extract_track(track_data: Dict[str, Any]) -> Track:
         """Extrait les données d'un track depuis les données JSON"""
         try:
-            track_id = track_data.get("track_id", 0)
-            title = track_data.get("track_name", "")
+            # Support des deux formats: id/name ou track_id/track_name
+            track_id = track_data.get("id", track_data.get("track_id", 0))
+            title = track_data.get("name", track_data.get("track_name", ""))
             slug = BeatportMappingUtils._build_slug(track_data, title)
             url = BeatportMappingUtils.build_url(BeatportEntityType.TRACK, slug, track_id)
             release_date = BeatportMappingUtils._extract_date(track_data)
@@ -69,8 +70,9 @@ class BeatportMappingUtils:
             artists, _ = BeatportMappingUtils._extract_artists_and_remixers(track_data)
 
             labels = []
-            if "label" in track_data and "label_name" in track_data["label"]:
-                labels = [BeatportMappingUtils.extract_label(track_data["label"])]
+            if "label" in track_data and isinstance(track_data["label"], dict):
+                label_data = track_data["label"]
+                labels = [BeatportMappingUtils.extract_label(label_data)]
 
             key = BeatportMappingUtils._extract_key(track_data)
 
