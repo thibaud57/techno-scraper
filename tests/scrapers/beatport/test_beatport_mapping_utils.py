@@ -1,5 +1,6 @@
 from app.models.beatport_models import BeatportEntityType
 from app.scrapers.beatport.beatport_mapping_utils import BeatportMappingUtils
+from tests.mocks.beatport_mocks import mock_beatport_release_data, mock_beatport_specific_format_release_data
 
 
 class TestBeatportMappingUtils:

@@ -5,6 +5,7 @@ import pytest
 from app.core.errors import ResourceNotFoundException, ParsingException
 from app.models import SoundcloudSearchResult, LimitEnum, SocialLink
 from app.scrapers.soundcloud.soundcloud_search_profile_scraper import SoundcloudSearchProfileScraper
+from tests.mocks.soundcloud_mocks import mock_soundcloud_search_data
 
 
 class TestSoundcloudSearchProfileScraper:

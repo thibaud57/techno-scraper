@@ -3,6 +3,7 @@ from unittest.mock import patch
 from app.models import SoundcloudProfile, SocialLink
 from app.scrapers.soundcloud.soundcloud_mapping_utils import SOUNDCLOUD_BASE_URL, \
     SoundcloudMappingUtils
+from tests.mocks.soundcloud_mocks import mock_soundcloud_webprofiles_data
 
 
 class TestSoundcloudMappingUtils:

@@ -5,6 +5,7 @@ import pytest
 from app.core.errors import ResourceNotFoundException, ParsingException
 from app.models import SocialLink
 from app.scrapers.soundcloud.soundcloud_webprofiles_scraper import SoundcloudWebprofilesScraper
+from tests.mocks.soundcloud_mocks import mock_soundcloud_webprofiles_data
 
 
 class TestSoundcloudWebprofilesScraper:

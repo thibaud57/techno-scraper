@@ -11,6 +11,7 @@ from tests.mocks.beatport_mocks import (
     BEATPORT_ARTIST_RELEASES_RESPONSE,
     BEATPORT_LABEL_RELEASES_RESPONSE,
     BEATPORT_404_RESPONSE,
+    mock_beatport_response_factory
 )
 
 

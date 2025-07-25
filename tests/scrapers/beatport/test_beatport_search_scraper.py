@@ -9,6 +9,7 @@ from app.scrapers.beatport.beatport_search_scraper import BeatportSearchScraper
 from tests.mocks.beatport_mocks import (
     BEATPORT_SEARCH_RESPONSE_IMPROVED,
     BEATPORT_404_RESPONSE,
+    mock_beatport_response_factory
 )
 
 
