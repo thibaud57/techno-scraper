@@ -2,7 +2,7 @@
 
 Ce document résume l'état actuel du projet, les fonctionnalités implémentées, et les prochaines étapes prévues.
 
-## État actuel du projet (19/05/2025)
+## État actuel du projet (25/07/2025)
 
 Le projet techno-scraper est une API FastAPI conçue pour scraper des données de différents sites liés à la musique techno (Soundcloud, Beatport, Bandcamp, Facebook, Instagram, Songstats). L'API est destinée à être utilisée par n8n pour automatiser des workflows de récupération de données.
 
@@ -34,7 +34,32 @@ Le projet techno-scraper est une API FastAPI conçue pour scraper des données d
     - Tests d'intégration des endpoints API
     - Mocks pour les réponses externes
 
-### Modifications récentes (19/05/2025)
+### Modifications récentes (25/07/2025)
+
+-   **Refactorisation majeure de l'architecture SoundCloud**
+    - Implémentation de l'authentification OAuth 2.1 avec Client Credentials Flow
+    - Création de services SoundCloud dédiés (`SoundcloudAuthService`, `SoundcloudApiService`)
+    - Séparation claire des responsabilités entre authentification et API
+    - Correction de l'URL de base API SoundCloud (`https://api.soundcloud.com`)
+    - Utilisation du format d'authentification correct (`OAuth ACCESS_TOKEN`)
+    - Suppression du paramètre `redirect_uri` inutile pour le Client Credentials Flow
+    - Amélioration de l'organisation du code avec des packages et imports propres
+
+-   **Mise à jour complète de l'architecture de test**
+    - Migration des tests des scrapers pour utiliser les nouveaux services SoundCloud
+    - Création de tests complets pour les services SoundCloud
+    - Optimisation des mocks et fixtures (suppression des redondances)
+    - Correction des signatures d'exceptions (`ResourceNotFoundException`)
+    - Architecture de test en couches : tests unitaires mockent les services, tests d'intégration mockent les scrapers
+
+-   **Corrections techniques importantes**
+    - Correction du mapping des webprofiles SoundCloud (support des clés "service" et "network")
+    - Extension du modèle `SocialLink` pour supporter Twitter et YouTube
+    - Mise à jour des mocks de test pour utiliser le format correct de l'API SoundCloud
+    - Gestion d'erreurs améliorée avec mécanismes de fallback
+    - Configuration des variables d'environnement SoundCloud dans GitHub Actions
+
+### Modifications précédentes (19/05/2025)
 
 -   Refactorisation complète et unification de la logique de test
     - Standardisation de l'approche des tests pour tous les scrapers
@@ -115,14 +140,30 @@ Le projet techno-scraper est une API FastAPI conçue pour scraper des données d
 
 ## Intégration API SoundCloud
 
-L'API SoundCloud utilisée par notre scraper offre plusieurs fonctionnalités clés :
+L'API SoundCloud utilisée par notre scraper a été complètement refactorisée avec une architecture moderne :
 
-### Authentification
+### Architecture des Services
 
--   Support d'OAuth 2.1 avec deux flux principaux :
-    -   Authorization Code Flow (pour actions au nom de l'utilisateur)
-    -   Client Credentials Flow (pour accès aux ressources publiques uniquement)
--   Le scraper utilise principalement le Client Credentials Flow
+-   **SoundcloudAuthService** : Gestion de l'authentification OAuth 2.1
+    -   Client Credentials Flow pour l'accès aux ressources publiques
+    -   Gestion automatique du renouvellement des tokens
+    -   Format d'authentification correct : `OAuth ACCESS_TOKEN`
+    -   URL d'authentification : `https://api.soundcloud.com/oauth2/token`
+
+-   **SoundcloudApiService** : Interface unifiée pour les appels API
+    -   URL de base corrigée : `https://api.soundcloud.com`
+    -   Gestion des erreurs avec retry et fallback
+    -   Support des headers d'authentification et des paramètres URL
+    -   Méthodes dédiées : `get_user()`, `search_users()`, `get_user_webprofiles()`
+
+### Authentification OAuth 2.1
+
+-   **Client Credentials Flow** implémenté correctement
+-   Variables d'environnement requises :
+    -   `SOUNDCLOUD_CLIENT_ID` : ID de l'application SoundCloud
+    -   `SOUNDCLOUD_CLIENT_SECRET` : Secret de l'application SoundCloud
+-   Suppression du paramètre `redirect_uri` inutile pour le Client Credentials Flow
+-   Gestion automatique de l'expiration des tokens avec marge de sécurité
 
 ### Fonctionnalités implémentées
 
@@ -132,13 +173,38 @@ L'API SoundCloud utilisée par notre scraper offre plusieurs fonctionnalités cl
 -   Support de la pagination avec les paramètres `offset` et `limit`
 -   Gestion des erreurs avec les codes HTTP appropriés
 -   Exécution concurrente des requêtes pour de meilleures performances
+-   Support étendu des plateformes sociales (Facebook, Instagram, sites web, ...)
+
+### Améliorations techniques
+
+-   Correction du mapping des webprofiles (support des clés "service" et "network")
+-   Gestion d'erreurs robuste avec exceptions typées
+-   Architecture en couches avec séparation des responsabilités
+-   Tests complets des services et des scrapers
+-   Configuration sécurisée via variables d'environnement et GitHub Secrets
 
 ### Limites connues
 
 -   L'API SoundCloud impose des limites de taux (rate limits)
 -   Les résultats sont limités à 50 par défaut (max 200)
 -   Certaines fonctionnalités nécessitent une authentification utilisateur
--   L'API nécessite un `client_id` valide qui pourrait expirer
+-   L'API nécessite des identifiants valides configurés correctement
+
+### Ressources et Documentation SoundCloud
+
+Pour plus d'informations sur l'API SoundCloud :
+
+-   [Documentation officielle de l'API SoundCloud](https://developers.soundcloud.com/)
+-   [Guide de l'API SoundCloud](https://developers.soundcloud.com/docs/api/guide)
+-   [Référence de l'API SoundCloud](https://developers.soundcloud.com/docs/api/reference)
+-   [Authentification OAuth 2.1](https://developers.soundcloud.com/docs/api/authentication)
+
+**Configuration requise** :
+1. Créer une application sur [SoundCloud Developers](https://developers.soundcloud.com/)
+2. Obtenir le `Client ID` et `Client Secret`
+3. Configurer les variables d'environnement `SOUNDCLOUD_CLIENT_ID` et `SOUNDCLOUD_CLIENT_SECRET`
+
+**Note** : Le projet utilise le **Client Credentials Flow** qui ne nécessite pas d'URI de redirection.
 
 ## Flux de travail recommandé
 
@@ -152,21 +218,41 @@ Pour obtenir un profil SoundCloud complet avec ses réseaux sociaux :
 ### Types de tests
 
 - **Tests unitaires** : Couvrent les fonctionnalités individuelles des scrapers et services
-  - Tests des méthodes de récupération et de transformation des données
-  - Validation des modèles de données
-  - Tests des mécanismes de retries
+  - Tests des scrapers SoundCloud : mockent les services
+  - Tests des services SoundCloud : mockent les requêtes HTTP
+  - Tests des scrapers Beatport : mockent BaseScraper.fetch
+  - Tests des services génériques : retry, pagination
 
 - **Tests d'intégration** : Vérifient l'interaction entre les différents composants
   - Tests des endpoints API complets
   - Validation des réponses API
   - Scénarios de bout en bout
+  - Mockent au niveau des scrapers (interface publique)
 
-### Pattern de test unifié
+### Architecture de test en couches
 
-Tous les tests de scrapers suivent désormais un pattern unifié :
-- Utilisation de fixtures pour instancier les scrapers
-- Utilisation de décorateurs `@patch` pour mocker les dépendances
-- Configuration des mocks via la valeur de retour (`mock_fetch.return_value`)
+L'architecture de test respecte la séparation des responsabilités :
+
+**Tests unitaires des scrapers :**
+```python
+@patch('app.services.soundcloud.soundcloud_api_service.SoundcloudApiService.get_user')
+```
+
+**Tests unitaires des services :**
+```python
+@patch('httpx.AsyncClient.request')
+```
+
+**Tests d'intégration :**
+```python
+@patch('app.scrapers.soundcloud.soundcloud_profile_scraper.SoundcloudProfileScraper.scrape')
+```
+
+### Optimisations des mocks et fixtures
+
+- Suppression des fixtures inutilisées (`mock_social_links`)
+- Utilisation ciblée de `mock_soundcloud_credentials` (pas d'`autouse=True`)
+- Mocks optimisés sans redondances
 - Structure cohérente pour tous les tests, facilitant la maintenance
 
 ### Exécution des tests

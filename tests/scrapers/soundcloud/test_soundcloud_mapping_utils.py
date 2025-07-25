@@ -1,44 +1,13 @@
 from unittest.mock import patch
 
-from app.models import SoundcloudProfile, LimitEnum
-from app.core.config import settings
-from app.scrapers.soundcloud.soundcloud_mapping_utils import SOUNDCLOUD_API_URL, SOUNDCLOUD_BASE_URL, \
+from app.models import SoundcloudProfile, SocialLink
+from app.scrapers.soundcloud.soundcloud_mapping_utils import SOUNDCLOUD_BASE_URL, \
     SoundcloudMappingUtils
-from tests.mocks.soundcloud_mocks import mock_soundcloud_client_id
 
 
 class TestSoundcloudMappingUtils:
 
-    def test_build_api_url_with_pagination(self):
-        encoded_query = "test+query"
-        page = 2
-        limit = LimitEnum.TWENTY_FIVE
-
-        url = SoundcloudMappingUtils.build_api_url_with_pagination(encoded_query, page, limit)
-
-        assert f"{SOUNDCLOUD_API_URL}/search/users" in url
-        assert f"q={encoded_query}" in url
-        assert f"client_id=test_client_id" in url
-        assert f"limit={limit.value}" in url
-        assert f"offset={(page - 1) * limit.value}" in url
-
-    def test_build_api_user_url(self):
-        user_id = 123456
-
-        url = SoundcloudMappingUtils.build_api_user_url(user_id)
-
-        assert f"{SOUNDCLOUD_API_URL}/users/soundcloud:users:{user_id}" in url
-        assert f"client_id=test_client_id" in url
-
-    def test_build_api_webprofiles_url(self):
-        user_id = 123456
-
-        url = SoundcloudMappingUtils.build_api_webprofiles_url(user_id)
-
-        assert f"{SOUNDCLOUD_API_URL}/users/soundcloud:users:{user_id}/web-profiles" in url
-        assert f"client_id=test_client_id" in url
-
-    def test_build_profile(self, mock_social_links):
+    def test_build_profile(self):
         user_data = {
             "id": 123456,
             "username": "test_user",
@@ -49,7 +18,13 @@ class TestSoundcloudMappingUtils:
             "avatar_url": "https://example.com/avatar.jpg"
         }
 
-        profile = SoundcloudMappingUtils.build_profile(user_data, mock_social_links)
+        social_links = [
+            SocialLink(platform="facebook", url="https://facebook.com/test_user"),
+            SocialLink(platform="instagram", url="https://instagram.com/test_user"),
+            SocialLink(platform="website", url="https://example.com")
+        ]
+
+        profile = SoundcloudMappingUtils.build_profile(user_data, social_links)
 
         assert isinstance(profile, SoundcloudProfile)
         assert profile.id == 123456

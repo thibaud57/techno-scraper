@@ -16,10 +16,9 @@ class TestSoundcloudSearchProfileScraper:
     
     @pytest.mark.asyncio
     @patch('app.scrapers.soundcloud.soundcloud_webprofiles_scraper.SoundcloudWebprofilesScraper.scrape', new_callable=AsyncMock)
-    @patch('app.scrapers.base_scraper.BaseScraper.fetch', new_callable=AsyncMock)
-    async def test_scrape_success(self, mock_fetch, mock_webprofiles_scrape, scraper, mock_response_factory, mock_soundcloud_search_data):
-        mock_response = mock_response_factory(json_data=mock_soundcloud_search_data)
-        mock_fetch.return_value = mock_response
+    @patch('app.services.soundcloud.soundcloud_api_service.SoundcloudApiService.search_users', new_callable=AsyncMock)
+    async def test_scrape_success(self, mock_search_users, mock_webprofiles_scrape, scraper, mock_soundcloud_search_data):
+        mock_search_users.return_value = mock_soundcloud_search_data
         
         social_links1 = [SocialLink(platform="instagram", url="https://instagram.com/test_user1")]
         social_links2 = [SocialLink(platform="facebook", url="https://facebook.com/test_user2")]
@@ -45,10 +44,13 @@ class TestSoundcloudSearchProfileScraper:
         assert result.profiles[1].social_links[0].platform.value == "facebook"
     
     @pytest.mark.asyncio
-    @patch('app.scrapers.base_scraper.BaseScraper.fetch', new_callable=AsyncMock)
-    async def test_scrape_404_error(self, mock_fetch, scraper, mock_response_factory):
-        mock_response = mock_response_factory(status_code=404)
-        mock_fetch.return_value = mock_response
+    @patch('app.services.soundcloud.soundcloud_api_service.SoundcloudApiService.search_users', new_callable=AsyncMock)
+    async def test_scrape_404_error(self, mock_search_users, scraper):
+        mock_search_users.side_effect = ResourceNotFoundException(
+            resource_type="Recherche de profils Soundcloud",
+            resource_id="test query",
+            details={"query": "test query"}
+        )
         
         with pytest.raises(ResourceNotFoundException) as excinfo:
             await scraper.scrape("test query")
@@ -57,13 +59,12 @@ class TestSoundcloudSearchProfileScraper:
         assert "test query" in str(excinfo.value)
     
     @pytest.mark.asyncio
-    @patch('app.scrapers.base_scraper.BaseScraper.fetch', new_callable=AsyncMock)
-    async def test_scrape_empty_results(self, mock_fetch, scraper, mock_response_factory):
-        mock_response = mock_response_factory(json_data={
+    @patch('app.services.soundcloud.soundcloud_api_service.SoundcloudApiService.search_users', new_callable=AsyncMock)
+    async def test_scrape_empty_results(self, mock_search_users, scraper):
+        mock_search_users.return_value = {
             "total_results": 0,
             "collection": []
-        })
-        mock_fetch.return_value = mock_response
+        }
         
         result = await scraper.scrape("test query")
         
@@ -73,10 +74,9 @@ class TestSoundcloudSearchProfileScraper:
     
     @pytest.mark.asyncio
     @patch('app.scrapers.soundcloud.soundcloud_webprofiles_scraper.SoundcloudWebprofilesScraper.scrape', new_callable=AsyncMock)
-    @patch('app.scrapers.base_scraper.BaseScraper.fetch', new_callable=AsyncMock)
-    async def test_scrape_with_webprofiles_error(self, mock_fetch, mock_webprofiles_scrape, scraper, mock_response_factory, mock_soundcloud_search_data):
-        mock_response = mock_response_factory(json_data=mock_soundcloud_search_data)
-        mock_fetch.return_value = mock_response
+    @patch('app.services.soundcloud.soundcloud_api_service.SoundcloudApiService.search_users', new_callable=AsyncMock)
+    async def test_scrape_with_webprofiles_error(self, mock_search_users, mock_webprofiles_scrape, scraper, mock_soundcloud_search_data):
+        mock_search_users.return_value = mock_soundcloud_search_data
         # Simuler une erreur lors de la récupération des réseaux sociaux
         mock_webprofiles_scrape.side_effect = Exception("Test error")
         
@@ -89,13 +89,14 @@ class TestSoundcloudSearchProfileScraper:
         assert len(result.profiles[1].social_links) == 0
     
     @pytest.mark.asyncio
-    @patch('app.scrapers.base_scraper.BaseScraper.fetch', new_callable=AsyncMock)
-    async def test_scrape_invalid_json(self, mock_fetch, scraper, mock_response_factory):
-        mock_response = mock_response_factory()
-        mock_response.json.side_effect = Exception("Invalid JSON")
-        mock_fetch.return_value = mock_response
+    @patch('app.services.soundcloud.soundcloud_api_service.SoundcloudApiService.search_users', new_callable=AsyncMock)
+    async def test_scrape_invalid_json(self, mock_search_users, scraper):
+        mock_search_users.side_effect = ParsingException(
+            message="Erreur lors du parsing de la recherche pour 'test query': Invalid JSON",
+            details={"error": "Invalid JSON"}
+        )
         
         with pytest.raises(ParsingException) as excinfo:
             await scraper.scrape("test query")
         
-        assert "Erreur lors du parsing" in str(excinfo.value) 
+        assert "Erreur lors du parsing" in str(excinfo.value)

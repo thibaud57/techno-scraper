@@ -116,6 +116,23 @@ class NetworkException(TemporaryScraperException):
         )
 
 
+class AuthenticationException(PermanentScraperException):
+    """
+    Exception pour les erreurs d'authentification
+    """
+
+    def __init__(
+            self,
+            message: str = "Erreur d'authentification",
+            details: Optional[Dict[str, Any]] = None
+    ):
+        super().__init__(
+            message=message,
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            details=details
+        )
+
+
 class ParsingException(PermanentScraperException):
     """
     Exception pour les erreurs de parsing

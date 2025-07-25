@@ -1,7 +1,6 @@
 import pytest
 from unittest.mock import patch
 
-from app.models import SocialLink
 from tests.mocks.http_mocks import mock_http_response_factory
 
 # Réutiliser le mock de réponse HTTP générique
@@ -67,36 +66,55 @@ def mock_soundcloud_webprofiles_data():
     """
     return [
         {
+            "created_at": "2023/10/26 17:50:50 +0000",
+            "id": 350958810,
+            "kind": "web-profile",
+            "service": "instagram",
+            "title": "",
             "url": "https://instagram.com/test_user",
-            "network": "instagram"
+            "username": "test_user"
         },
         {
+            "created_at": "2023/10/26 17:50:50 +0000",
+            "id": 350958811,
+            "kind": "web-profile",
+            "service": "facebook",
+            "title": "",
             "url": "https://facebook.com/test_user",
-            "network": "facebook"
+            "username": "test_user"
         },
         {
+            "created_at": "2023/10/26 17:50:50 +0000",
+            "id": 350958812,
+            "kind": "web-profile",
+            "service": "personal",
+            "title": "",
             "url": "https://example.com",
-            "network": "personal"
+            "username": "test_user"
         }
     ]
 
 
 @pytest.fixture
-def mock_social_links():
+def mock_soundcloud_credentials():
     """
-    Liens sociaux pour les tests
+    Mock pour les identifiants SoundCloud dans les tests.
+    Utilisé uniquement quand nécessaire (pas autouse=True).
     """
-    return [
-        SocialLink(platform="facebook", url="https://facebook.com/test_user"),
-        SocialLink(platform="instagram", url="https://instagram.com/test_user"),
-        SocialLink(platform="website", url="https://example.com")
-    ]
+    with patch('app.core.config.settings.SOUNDCLOUD_CLIENT_ID', 'test_client_id'), \
+         patch('app.core.config.settings.SOUNDCLOUD_CLIENT_SECRET', 'test_client_secret'):
+        yield
 
 
 @pytest.fixture(autouse=True)
-def mock_soundcloud_client_id():
+def mock_soundcloud_auth_service():
     """
-    Mock pour le client ID SoundCloud dans les tests
+    Mock pour le service d'authentification SoundCloud dans les tests
     """
-    with patch('app.core.config.settings.SOUNDCLOUD_CLIENT_ID', 'test_client_id'):
+    with patch('app.services.soundcloud.soundcloud_auth.get_access_token',
+               return_value="test_access_token"), \
+         patch('app.services.soundcloud.soundcloud_auth.build_auth_url',
+               side_effect=lambda url: f"{url}?access_token=test_access_token"), \
+         patch('app.services.soundcloud.soundcloud_auth.get_auth_headers',
+               return_value={"Authorization": "OAuth test_access_token"}):
         yield

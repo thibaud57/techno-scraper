@@ -8,7 +8,7 @@ from app.models import BeatportSearchResult, LimitEnum
 from app.models.beatport_models import BeatportEntityType
 from app.scrapers.base_scraper import BaseScraper
 from app.scrapers.beatport.beatport_mapping_utils import BeatportMappingUtils
-from app.services.pagination_service import PaginationService
+from app.services import PaginationService
 
 logger = logging.getLogger(__name__)
 

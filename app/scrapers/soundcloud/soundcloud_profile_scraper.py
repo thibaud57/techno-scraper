@@ -6,6 +6,7 @@ from app.models import SoundcloudProfile
 from app.scrapers.base_scraper import BaseScraper
 from app.scrapers.soundcloud.soundcloud_mapping_utils import SoundcloudMappingUtils
 from app.scrapers.soundcloud.soundcloud_webprofiles_scraper import SoundcloudWebprofilesScraper
+from app.services.soundcloud import soundcloud_api
 
 logger = logging.getLogger(__name__)
 
@@ -16,36 +17,28 @@ class SoundcloudProfileScraper(BaseScraper):
     async def scrape(self, user_id: int) -> SoundcloudProfile:
         logger.info(f"Récupération du profil par ID: {user_id}")
 
-        # Scraping du profil
-        profile_url = SoundcloudMappingUtils.build_api_user_url(user_id)
-        profile_task = self.fetch(profile_url)
-
-        # Scraping des réseaux sociaux
+        # Scraping du profil et des réseaux sociaux en parallèle
         webprofiles_scraper = SoundcloudWebprofilesScraper()
-        webprofiles_task = webprofiles_scraper.scrape(user_id)
-
-        # Attendre les deux résultats (gestion des erreurs séparément)
-        profile_response, social_links = await asyncio.gather(
-            profile_task,
-            webprofiles_task,
+        
+        # Exécuter les deux requêtes en parallèle
+        profile_data, social_links = await asyncio.gather(
+            soundcloud_api.get_user(user_id),
+            webprofiles_scraper.scrape(user_id),
             return_exceptions=True
         )
 
-        if isinstance(profile_response, Exception):
-            raise profile_response
-        if profile_response.status_code == 404:
-            raise ResourceNotFoundException(
-                resource_type="Profil Soundcloud",
-                resource_id=str(user_id)
-            )
+        print(profile_data)
+
+        # Gérer les erreurs du profil
+        if isinstance(profile_data, Exception):
+            raise profile_data
 
         try:
-            # Extraire les données JSON du profil
-            profile_data = profile_response.json()
+            # Vérifier que le résultat est bien un profil utilisateur
             if profile_data.get("kind") != "user":
                 raise ParsingException(
                     message=f"Le résultat n'est pas un profil utilisateur pour l'ID: {user_id}",
-                    details={"url": profile_url, "kind": profile_data.get("kind")}
+                    details={"kind": profile_data.get("kind")}
                 )
 
             # Si les réseaux sociaux sont erronés, on passe un tableau vide
@@ -63,6 +56,6 @@ class SoundcloudProfileScraper(BaseScraper):
             if not isinstance(e, (ResourceNotFoundException, ParsingException)):
                 raise ParsingException(
                     message=f"Erreur lors du parsing du profil avec ID {user_id}: {str(e)}",
-                    details={"url": profile_url, "error": str(e)}
+                    details={"error": str(e)}
                 )
             raise

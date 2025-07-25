@@ -8,7 +8,7 @@ from fake_useragent import UserAgent
 from app.core.config import settings
 from app.core.errors import (NetworkException, PermanentScraperException,
                              RateLimitException, TemporaryScraperException)
-from app.services.retry_service import with_retry
+from app.services import with_retry
 
 logger = logging.getLogger(__name__)
 

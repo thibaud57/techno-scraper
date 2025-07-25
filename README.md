@@ -9,9 +9,9 @@ Techno-scraper est une API FastAPI qui permet de récupérer des données de dif
 ## 🚀 Fonctionnalités
 
 ### Soundcloud
-- **Recherche profils** : Extraction des informations détaillées des profils d'artistes
+- **Recherche profils** : Extraction des informations détaillées des profils d'artistes avec authentification OAuth 2.1
 - **Profil par id** : Extraction des données d'un profil en recherchant par son id
-- **Réseaux sociaux** : Récupération des liens vers les plateformes externes (Facebook, Instagram, Spotify, etc.)
+- **Réseaux sociaux** : Récupération des liens vers les plateformes externes (Facebook, Instagram, sites web personnels, etc.)
 
 ### Beatport
 - **Recherche** : Extraction de données pour les artistes, labels, releases et tracks
@@ -78,6 +78,8 @@ Le projet est configuré pour être déployé automatiquement sur un VPS via Git
     - `SSH_PRIVATE_KEY` : Clé privée SSH
     - `SSH_PORT` : Port SSH (généralement 22)
     - `API_KEY` : Clé API pour l'authentification
+    - `SOUNDCLOUD_CLIENT_ID` : Client ID de votre application SoundCloud
+    - `SOUNDCLOUD_CLIENT_SECRET` : Client Secret de votre application SoundCloud
 
 3. Pousser vos modifications sur la branche `main` pour déclencher le déploiement automatique.
 
@@ -149,20 +151,40 @@ techno-scraper/
 │   ├── core/                 # Fonctionnalités centrales
 │   ├── models/               # Modèles de données
 │   ├── routers/              # Endpoints API
-│   ├── services/             # Services
+│   ├── services/             # Services (authentification, API, pagination, retry)
+│   │   └── soundcloud/       # Services SoundCloud dédiés
 │   └── scrapers/             # Modules de scraping
-├── tests/                    # Tests unitaires et d'intégration
+│       └── soundcloud/       # Scrapers SoundCloud avec architecture moderne
+├── tests/                    # Tests unitaires et d'intégration (103 tests)
 │   ├── conftest.py           # Configuration des tests
-│   ├── integration/          # Tests d'intégration
-│   ├── mocks/                # Mocks pour les tests
-│   ├── scrapers/             # Tests des scrapers
-│   └── services/             # Tests des services
+│   ├── integration/          # Tests d'intégration (33 tests)
+│   ├── mocks/                # Mocks optimisés pour les tests
+│   ├── scrapers/             # Tests des scrapers (46 tests)
+│   │   └── soundcloud/       # Tests SoundCloud mis à jour
+│   └── services/             # Tests des services (24 tests)
+│       └── soundcloud/       # Tests des services SoundCloud
 ├── .github/                  # Configuration GitHub
 ├── scripts/                  # Scripts utilitaires
 ├── Dockerfile                # Configuration Docker
 ├── docker-compose.yml        # Configuration Docker Compose
 └── requirements.txt          # Dépendances Python
 ```
+
+## 📚 Ressources et Documentation
+
+### API SoundCloud
+- [Documentation officielle de l'API SoundCloud](https://developers.soundcloud.com/)
+- [Guide de l'API SoundCloud](https://developers.soundcloud.com/docs/api/guide)
+- [Référence de l'API SoundCloud](https://developers.soundcloud.com/docs/api/reference)
+- [Authentification OAuth 2.1](https://developers.soundcloud.com/docs/api/authentication)
+
+### Configuration SoundCloud
+Pour utiliser l'intégration SoundCloud, vous devez :
+1. Créer une application sur [SoundCloud Developers](https://developers.soundcloud.com/)
+2. Obtenir votre `Client ID` et `Client Secret`
+3. Configurer ces identifiants dans vos variables d'environnement
+
+Le projet utilise le **Client Credentials Flow** d'OAuth 2.1 pour l'authentification, permettant l'accès aux ressources publiques de SoundCloud sans intervention utilisateur.
 
 ## 🤝 Contribution
 

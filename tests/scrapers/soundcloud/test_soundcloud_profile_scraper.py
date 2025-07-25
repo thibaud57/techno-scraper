@@ -15,10 +15,9 @@ class TestSoundcloudProfileScraper:
     
     @pytest.mark.asyncio
     @patch('app.scrapers.soundcloud.soundcloud_webprofiles_scraper.SoundcloudWebprofilesScraper.scrape', new_callable=AsyncMock)
-    @patch('app.scrapers.base_scraper.BaseScraper.fetch', new_callable=AsyncMock)
-    async def test_scrape_success(self, mock_fetch, mock_webprofiles_scrape, scraper, mock_soundcloud_user_data, mock_response_factory):
-        mock_response = mock_response_factory(json_data=mock_soundcloud_user_data)
-        mock_fetch.return_value = mock_response
+    @patch('app.services.soundcloud.soundcloud_api_service.SoundcloudApiService.get_user', new_callable=AsyncMock)
+    async def test_scrape_success(self, mock_get_user, mock_webprofiles_scrape, scraper, mock_soundcloud_user_data):
+        mock_get_user.return_value = mock_soundcloud_user_data
         
         social_links = [
             SocialLink(platform="instagram", url="https://instagram.com/test_user")
@@ -40,10 +39,13 @@ class TestSoundcloudProfileScraper:
         assert str(result.social_links[0].url) == "https://instagram.com/test_user"
     
     @pytest.mark.asyncio
-    @patch('app.scrapers.base_scraper.BaseScraper.fetch', new_callable=AsyncMock)
-    async def test_scrape_404_error(self, mock_fetch, scraper, mock_response_factory):
-        mock_response = mock_response_factory(status_code=404)
-        mock_fetch.return_value = mock_response
+    @patch('app.services.soundcloud.soundcloud_api_service.SoundcloudApiService.get_user', new_callable=AsyncMock)
+    async def test_scrape_404_error(self, mock_get_user, scraper):
+        mock_get_user.side_effect = ResourceNotFoundException(
+            resource_type="Profil Soundcloud",
+            resource_id="123456",
+            details={"user_id": 123456}
+        )
         
         with pytest.raises(ResourceNotFoundException) as excinfo:
             await scraper.scrape(123456)
@@ -53,11 +55,9 @@ class TestSoundcloudProfileScraper:
     
     @pytest.mark.asyncio
     @patch('app.scrapers.soundcloud.soundcloud_webprofiles_scraper.SoundcloudWebprofilesScraper.scrape', new_callable=AsyncMock)
-    @patch('app.scrapers.base_scraper.BaseScraper.fetch', new_callable=AsyncMock)
-    async def test_scrape_wrong_kind(self, mock_fetch, mock_webprofiles_scrape, scraper, mock_response_factory):
-        mock_response = mock_response_factory(json_data={"kind": "track", "id": 123456})
-        mock_fetch.return_value = mock_response
-        
+    @patch('app.services.soundcloud.soundcloud_api_service.SoundcloudApiService.get_user', new_callable=AsyncMock)
+    async def test_scrape_wrong_kind(self, mock_get_user, mock_webprofiles_scrape, scraper):
+        mock_get_user.return_value = {"kind": "track", "id": 123456}
         mock_webprofiles_scrape.return_value = []
         
         with pytest.raises(ParsingException) as excinfo:
@@ -67,14 +67,12 @@ class TestSoundcloudProfileScraper:
     
     @pytest.mark.asyncio
     @patch('app.scrapers.soundcloud.soundcloud_webprofiles_scraper.SoundcloudWebprofilesScraper.scrape', new_callable=AsyncMock)
-    @patch('app.scrapers.base_scraper.BaseScraper.fetch', new_callable=AsyncMock)
-    async def test_scrape_with_webprofiles_error(self, mock_fetch, mock_webprofiles_scrape, scraper, mock_soundcloud_user_data, mock_response_factory):
-        mock_response = mock_response_factory(json_data=mock_soundcloud_user_data)
-        mock_fetch.return_value = mock_response
-        
+    @patch('app.services.soundcloud.soundcloud_api_service.SoundcloudApiService.get_user', new_callable=AsyncMock)
+    async def test_scrape_with_webprofiles_error(self, mock_get_user, mock_webprofiles_scrape, scraper, mock_soundcloud_user_data):
+        mock_get_user.return_value = mock_soundcloud_user_data
         mock_webprofiles_scrape.side_effect = Exception("Test error")
         
         result = await scraper.scrape(123456)
         
         assert isinstance(result, SoundcloudProfile)
-        assert len(result.social_links) == 0 
+        assert len(result.social_links) == 0

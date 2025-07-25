@@ -14,14 +14,15 @@ tests/
 │   ├── test_api_routes.py  # Tests des routes API générales
 │   ├── test_beatport_router.py  # Tests des routes Beatport
 │   └── test_soundcloud_router.py  # Tests des routes Soundcloud
-├── mocks/               # Mocks réutilisables pour les tests unitaires
-├── scrapers/            # Tests unitaires pour les scrapers
-│   ├── soundcloud/      # Tests spécifiques pour SoundCloud
-│   ├── beatport/        # Tests spécifiques pour Beatport 
+├── mocks/               # Mocks réutilisables optimisés pour les tests unitaires
+├── scrapers/            # Tests unitaires pour les scrapers (46 tests)
+│   ├── soundcloud/      # Tests spécifiques pour SoundCloud (24 tests)
+│   ├── beatport/        # Tests spécifiques pour Beatport (22 tests)
 │   └── ...              # Tests pour d'autres scrapers
-└── services/            # Tests unitaires pour les services génériques
+└── services/            # Tests unitaires pour les services (24 tests)
+    ├── soundcloud/      # Tests des services SoundCloud (14 tests)
     ├── test_retry_service.py  # Tests pour le service de retry
-    └── ...              # Tests pour d'autres services
+    └── test_pagination_service.py  # Tests pour le service de pagination
 ```
 
 ## Types de tests
@@ -79,15 +80,15 @@ Les tests suivent une structure cohérente à travers les différents modules :
 
 ### Pattern décoratif uniformisé
 
-Les tests pour les scrapers Beatport et SoundCloud suivent un pattern commun :
+Les tests suivent des patterns adaptés selon le niveau de test :
 
+**Tests des scrapers (mockent les services) :**
 ```python
 @pytest.mark.asyncio
-@patch('app.scrapers.base_scraper.BaseScraper.fetch', new_callable=AsyncMock)
-async def test_example(self, mock_fetch, scraper, mock_factory):
-    # Configuration des mocks
-    mock_response = mock_factory(...)
-    mock_fetch.return_value = mock_response
+@patch('app.services.soundcloud.soundcloud_api_service.SoundcloudApiService.get_user', new_callable=AsyncMock)
+async def test_example(self, mock_get_user, scraper, mock_data):
+    # Configuration des mocks au niveau service
+    mock_get_user.return_value = mock_data
     
     # Appel de la méthode sous test
     result = await scraper.scrape(...)
@@ -96,17 +97,41 @@ async def test_example(self, mock_fetch, scraper, mock_factory):
     assert result...
 ```
 
-Cette approche uniformisée facilite la maintenance et la compréhension du code.
+**Tests des services (mockent les requêtes HTTP) :**
+```python
+@pytest.mark.asyncio
+@patch('httpx.AsyncClient.request', new_callable=AsyncMock)
+async def test_service(self, mock_request, service):
+    # Configuration des mocks HTTP
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_request.return_value = mock_response
+    
+    # Test du service
+    result = await service.method(...)
+    
+    # Assertions
+    assert result...
+```
+
+Cette approche en couches facilite la maintenance et assure une séparation claire des responsabilités.
 
 ## Mocks et fixtures
 
-Le projet utilise des mocks réutilisables pour faciliter les tests :
+Le projet utilise des mocks optimisés et réutilisables pour faciliter les tests :
 
-- Les mocks HTTP : pour simuler les réponses des API externes
-- Les mocks des modèles : pour générer des objets de données standardisés
-- Les fixtures spécifiques aux services : pour configurer les environnements de test
+- **Mocks HTTP** : pour simuler les réponses des API externes
+- **Mocks des modèles** : pour générer des objets de données standardisés
+- **Fixtures spécifiques aux services** : pour configurer les environnements de test
+- **Mocks d'authentification** : pour les identifiants SoundCloud (utilisés de manière ciblée)
 
-Ces mocks sont définis dans les répertoires `tests/mocks/` (tests unitaires) et `tests/integration/mocks/` (tests d'intégration) et sont réutilisés à travers les différents tests.
+### Organisation des mocks
+
+- `tests/mocks/` : Mocks pour les tests unitaires (optimisés, sans redondances)
+- `tests/integration/mocks/` : Mocks spécifiques aux tests d'intégration
+- Fixtures utilisées de manière ciblée (pas d'`autouse=True` inutile)
+
+Ces mocks sont réutilisés à travers les différents tests et suivent les bonnes pratiques de test.
 
 ## Tests asynchrones
 

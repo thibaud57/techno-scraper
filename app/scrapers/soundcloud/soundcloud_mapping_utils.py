@@ -3,34 +3,20 @@ from typing import Any, Dict, List, Optional
 
 try:
     import pycountry
+
     PYCOUNTRY_AVAILABLE = True
 except ImportError:
     PYCOUNTRY_AVAILABLE = False
 
-from app.models import LimitEnum, SocialLink, SoundcloudProfile, Track
-from app.core.config import settings
+from app.models import SocialLink, SoundcloudProfile
 
 logger = logging.getLogger(__name__)
 
 # Constantes pour l'API SoundCloud
 SOUNDCLOUD_BASE_URL = "https://soundcloud.com"
-SOUNDCLOUD_API_URL = "https://api-v2.soundcloud.com"
 
 class SoundcloudMappingUtils:
     """Utilitaires pour mapper les données SoundCloud vers nos modèles"""
-
-    @staticmethod
-    def build_api_url_with_pagination(encoded_query: str, page: int, limit: LimitEnum) -> str:
-        offset = (page - 1) * limit.value
-        return f"{SOUNDCLOUD_API_URL}/search/users?q={encoded_query}&client_id={settings.SOUNDCLOUD_CLIENT_ID}&limit={limit.value}&offset={offset}"
-
-    @staticmethod
-    def build_api_user_url(user_id: int) -> str:
-        return f"{SOUNDCLOUD_API_URL}/users/soundcloud:users:{user_id}?client_id={settings.SOUNDCLOUD_CLIENT_ID}"
-
-    @staticmethod
-    def build_api_webprofiles_url(user_id: int) -> str:
-        return f"{SOUNDCLOUD_API_URL}/users/soundcloud:users:{user_id}/web-profiles?client_id={settings.SOUNDCLOUD_CLIENT_ID}"
 
     @staticmethod
     def build_profile(
@@ -38,7 +24,10 @@ class SoundcloudMappingUtils:
             social_links: List[SocialLink]
     ) -> SoundcloudProfile:
         profile_url = SoundcloudMappingUtils.build_profile_url(user_data)
-        country = SoundcloudMappingUtils.get_country_name(user_data.get("country_code"))
+
+        # Utiliser le champ country s'il existe, sinon utiliser country_code
+        country_code = user_data.get("country_code") or user_data.get("country")
+        country = SoundcloudMappingUtils.get_country_name(country_code)
 
         return SoundcloudProfile(
             id=user_data.get("id", 0),
@@ -88,9 +77,10 @@ class SoundcloudMappingUtils:
         social_links = []
 
         for item in user_data:
-            if "url" in item and "network" in item:
-                network = item.get("network", "")
+            if "url" in item and ("network" in item or "service" in item):
+                network = item.get("service", item.get("network", ""))
                 url = item.get("url", "")
+
                 # Convertir 'personal' en 'website'
                 if network == "personal":
                     network = "website"
@@ -98,5 +88,6 @@ class SoundcloudMappingUtils:
                 social_link = SocialLink.from_service(network, url)
                 if social_link:
                     social_links.append(social_link)
-
+                else:
+                    logger.debug(f"Réseau social non reconnu: {network}")
         return social_links

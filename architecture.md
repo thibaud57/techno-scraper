@@ -34,17 +34,23 @@ techno-scraper/
 │   │   ├── facebook.py          # Router pour Facebook
 │   │   ├── instagram.py         # Router pour Instagram
 │   │   └── songstats.py         # Router pour Songstats
-│   ├── services/                # Logique métier
+│   ├── services/                # Logique métier et services
 │   │   ├── __init__.py
-│   │   └── retry_service.py     # Service de retry avec backoff
+│   │   ├── retry_service.py     # Service de retry avec backoff
+│   │   ├── pagination_service.py # Service de pagination
+│   │   └── soundcloud/          # Services SoundCloud dédiés
+│   │       ├── __init__.py
+│   │       ├── soundcloud_auth_service.py    # Authentification OAuth 2.1
+│   │       └── soundcloud_api_service.py     # Interface API SoundCloud
 │   └── scrapers/                # Modules de scraping
 │       ├── __init__.py
-│       ├── base.py              # Classe de base pour les scrapers
-│       ├── soundcloud/          # Scraper pour Soundcloud
+│       ├── base_scraper.py      # Classe de base pour les scrapers
+│       ├── soundcloud/          # Scrapers SoundCloud avec architecture moderne
 │       │   ├── __init__.py
-│       │   ├── profile.py       # Scraping de profil
-│       │   └── search.py        # Scraping de recherche
-│       │   └── mapping_utils.py # Utilitaires de mapping des données Soundcloud
+│       │   ├── soundcloud_profile_scraper.py        # Scraping de profil
+│       │   ├── soundcloud_search_profile_scraper.py # Scraping de recherche
+│       │   ├── soundcloud_webprofiles_scraper.py    # Scraping des réseaux sociaux
+│       │   └── soundcloud_mapping_utils.py          # Utilitaires de mapping
 │       ├── beatport/            # Scraper pour Beatport
 │       │   ├── __init__.py
 │       │   ├── search.py        # Scraping de recherche
@@ -62,13 +68,14 @@ techno-scraper/
 │   │   ├── test_api_routes.py   # Tests des routes API générales
 │   │   └── test_soundcloud_router.py # Tests des routes Soundcloud
 │   ├── mocks/                   # Mocks réutilisables
-│   ├── scrapers/                # Tests unitaires des scrapers
-│   │   ├── soundcloud/          # Tests pour Soundcloud
-│   │   ├── beatport/            # Tests pour Beatport
+│   ├── scrapers/                # Tests unitaires des scrapers (46 tests)
+│   │   ├── soundcloud/          # Tests pour Soundcloud (24 tests)
+│   │   ├── beatport/            # Tests pour Beatport (22 tests)
 │   │   └── ...                  # Tests pour autres scrapers
-│   └── services/                # Tests des services
+│   └── services/                # Tests des services (24 tests)
+│       ├── soundcloud/          # Tests des services SoundCloud (14 tests)
 │       ├── test_retry_service.py # Tests du service de retry
-│       └── ...
+│       └── test_pagination_service.py # Tests du service de pagination
 ├── .github/                     # Configuration GitHub
 │   └── workflows/               # Workflows GitHub Actions
 │       ├── deploy.yml           # Workflow de déploiement principal
@@ -193,20 +200,36 @@ flowchart TD
 ### 2. Business Layer (Services)
 
 -   **services/retry_service.py**: Gestion des retries avec backoff exponentiel
+-   **services/pagination_service.py**: Service de pagination réutilisable
+-   **services/soundcloud/**: Services SoundCloud dédiés avec architecture moderne
+    -   **soundcloud_auth_service.py**: Authentification OAuth 2.1 avec Client Credentials Flow
+    -   **soundcloud_api_service.py**: Interface unifiée pour les appels API SoundCloud
 -   Logique métier pour transformer les données brutes en réponses API
+-   Séparation claire des responsabilités entre authentification et API
 
 ### 3. Data Layer (Scrapers)
 
--   **scrapers/base.py**: Classe de base avec fonctionnalités communes
+-   **scrapers/base_scraper.py**: Classe de base avec fonctionnalités communes
+-   **scrapers/soundcloud/**: Scrapers SoundCloud avec architecture moderne
+    -   Utilisation des services SoundCloud dédiés pour l'authentification et les appels API
+    -   Séparation claire entre profils, recherche et réseaux sociaux
+    -   Gestion d'erreurs robuste avec exceptions typées
 -   Scrapers spécifiques à chaque site, organisés par fonctionnalité
 
 ### 4. Test Layer
 
 -   **tests/conftest.py**: Configuration globale et fixtures partagées
 -   **tests/integration/**: Tests d'intégration des API et endpoints
+    -   Mockent au niveau des scrapers (interface publique)
+    -   Testent l'API complète end-to-end
 -   **tests/scrapers/**: Tests unitaires pour les scrapers
+    -   Tests SoundCloud: mockent les services SoundCloud
+    -   Tests Beatport: mockent BaseScraper.fetch
 -   **tests/services/**: Tests unitaires pour les services
--   **tests/mocks/**: Mocks réutilisables pour simuler les réponses externes
+    -   Tests services SoundCloud: mockent les requêtes HTTP
+    -   Tests services génériques: retry, pagination
+-   **tests/mocks/**: Mocks optimisés et réutilisables (sans redondances)
+    -   Architecture en couches avec mocks appropriés selon le niveau de test
 
 ### 5. Configuration Docker
 
