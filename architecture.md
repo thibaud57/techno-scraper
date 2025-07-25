@@ -68,12 +68,12 @@ techno-scraper/
 │   │   ├── test_api_routes.py   # Tests des routes API générales
 │   │   └── test_soundcloud_router.py # Tests des routes Soundcloud
 │   ├── mocks/                   # Mocks réutilisables
-│   ├── scrapers/                # Tests unitaires des scrapers (46 tests)
-│   │   ├── soundcloud/          # Tests pour Soundcloud (24 tests)
-│   │   ├── beatport/            # Tests pour Beatport (22 tests)
+│   ├── scrapers/                # Tests unitaires des scrapers
+│   │   ├── soundcloud/          # Tests pour Soundcloud
+│   │   ├── beatport/            # Tests pour Beatport
 │   │   └── ...                  # Tests pour autres scrapers
-│   └── services/                # Tests des services (24 tests)
-│       ├── soundcloud/          # Tests des services SoundCloud (14 tests)
+│   └── services/                # Tests des services
+│       ├── soundcloud/          # Tests des services SoundCloud
 │       ├── test_retry_service.py # Tests du service de retry
 │       └── test_pagination_service.py # Tests du service de pagination
 ├── .github/                     # Configuration GitHub

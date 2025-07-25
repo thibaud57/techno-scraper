@@ -15,12 +15,12 @@ tests/
 │   ├── test_beatport_router.py  # Tests des routes Beatport
 │   └── test_soundcloud_router.py  # Tests des routes Soundcloud
 ├── mocks/               # Mocks réutilisables optimisés pour les tests unitaires
-├── scrapers/            # Tests unitaires pour les scrapers (46 tests)
-│   ├── soundcloud/      # Tests spécifiques pour SoundCloud (24 tests)
-│   ├── beatport/        # Tests spécifiques pour Beatport (22 tests)
+├── scrapers/            # Tests unitaires pour les scrapers
+│   ├── soundcloud/      # Tests spécifiques pour SoundCloud
+│   ├── beatport/        # Tests spécifiques pour Beatport
 │   └── ...              # Tests pour d'autres scrapers
-└── services/            # Tests unitaires pour les services (24 tests)
-    ├── soundcloud/      # Tests des services SoundCloud (14 tests)
+└── services/            # Tests unitaires pour les services
+    ├── soundcloud/      # Tests des services SoundCloud
     ├── test_retry_service.py  # Tests pour le service de retry
     └── test_pagination_service.py  # Tests pour le service de pagination
 ```

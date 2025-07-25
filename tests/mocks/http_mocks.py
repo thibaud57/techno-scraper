@@ -25,11 +25,3 @@ def mock_http_response_factory():
         return response
 
     return _make_response
-
-
-@pytest.fixture
-def mock_network_error():
-    """
-    Crée une exception de réseau httpx à utiliser dans les tests.
-    """
-    return httpx.RequestError("Erreur réseau simulée", request=MagicMock())

@@ -5,10 +5,11 @@ import pytest
 
 from app.core.errors import ResourceNotFoundException, ParsingException
 from app.models import LimitEnum
-from app.models.beatport_models import BeatportEntityType
+from app.models.beatport_models import BeatportEntityType, BeatportReleasesResult
 from app.scrapers.beatport.beatport_releases_scraper import BeatportReleasesScraper
 from tests.mocks.beatport_mocks import (
     BEATPORT_ARTIST_RELEASES_RESPONSE,
+    BEATPORT_ARTIST_RELEASES_WITH_FACETS_RESPONSE,
     BEATPORT_LABEL_RELEASES_RESPONSE,
     BEATPORT_404_RESPONSE,
     mock_beatport_response_factory
@@ -27,7 +28,7 @@ class TestBeatportReleasesScraper:
         mock_response = mock_beatport_response_factory(html=BEATPORT_ARTIST_RELEASES_RESPONSE)
         mock_fetch.return_value = mock_response
         
-        results = await scraper.scrape(
+        result = await scraper.scrape(
             entity_type=BeatportEntityType.ARTIST,
             entity_slug="test-artist",
             entity_id="654321",
@@ -41,9 +42,10 @@ class TestBeatportReleasesScraper:
         assert "page=1" in fetch_call
         assert "per_page=10" in fetch_call
 
-        # Vérifier les résultats
-        assert len(results) == 1
-        release = results[0]
+        # Vérifier la structure du résultat
+        assert isinstance(result, BeatportReleasesResult)
+        assert len(result.releases) == 1
+        release = result.releases[0]
         assert release.id == 123456
         assert release.title == "Test Release 1"
         assert release.release_date == "2025-01-15"
@@ -58,7 +60,7 @@ class TestBeatportReleasesScraper:
         mock_response = mock_beatport_response_factory(html=BEATPORT_LABEL_RELEASES_RESPONSE)
         mock_fetch.return_value = mock_response
         
-        results = await scraper.scrape(
+        result = await scraper.scrape(
             entity_type=BeatportEntityType.LABEL,
             entity_slug="test-label",
             entity_id="555666",
@@ -72,9 +74,10 @@ class TestBeatportReleasesScraper:
         assert "page=1" in fetch_call
         assert "per_page=10" in fetch_call
 
-        # Vérifier les résultats
-        assert len(results) == 1
-        release = results[0]
+        # Vérifier la structure du résultat
+        assert isinstance(result, BeatportReleasesResult)
+        assert len(result.releases) == 1
+        release = result.releases[0]
         assert release.id == 654321
         assert release.title == "Test Release 2"
         assert release.release_date == "2025-02-20"
@@ -178,4 +181,61 @@ class TestBeatportReleasesScraper:
             limit=LimitEnum.TEN
         )
         label_url = mock_fetch.call_args_list[0][0][0]
-        assert "label/test-label/789012/releases" in label_url 
+        assert "label/test-label/789012/releases" in label_url
+
+    @pytest.mark.asyncio
+    @patch('app.scrapers.base_scraper.BaseScraper.fetch', new_callable=AsyncMock)
+    async def test_scrape_releases_with_facets(self, mock_fetch, scraper, mock_beatport_response_factory):
+        mock_response = mock_beatport_response_factory(html=BEATPORT_ARTIST_RELEASES_WITH_FACETS_RESPONSE)
+        mock_fetch.return_value = mock_response
+        
+        result = await scraper.scrape(
+            entity_type=BeatportEntityType.ARTIST,
+            entity_slug="test-artist",
+            entity_id="654321",
+            page=1,
+            limit=LimitEnum.TEN
+        )
+
+        # Vérifier la structure du résultat
+        assert isinstance(result, BeatportReleasesResult)
+        
+        # Vérifier les releases
+        assert len(result.releases) == 1
+        release = result.releases[0]
+        assert release.id == 123456
+        assert release.title == "Test Release 1"
+        
+        # Vérifier les facets
+        assert result.facets is not None
+        assert result.facets.fields is not None
+        assert len(result.facets.fields.genre) == 3
+        
+        # Vérifier les genres spécifiques
+        genres = {genre.name: genre.count for genre in result.facets.fields.genre}
+        assert genres["House"] == 70
+        assert genres["Deep House"] == 19
+        assert genres["Tech House"] == 21
+
+    @pytest.mark.asyncio
+    @patch('app.scrapers.base_scraper.BaseScraper.fetch', new_callable=AsyncMock)
+    async def test_scrape_releases_without_facets(self, mock_fetch, scraper, mock_beatport_response_factory):
+        mock_response = mock_beatport_response_factory(html=BEATPORT_ARTIST_RELEASES_RESPONSE)
+        mock_fetch.return_value = mock_response
+        
+        result = await scraper.scrape(
+            entity_type=BeatportEntityType.ARTIST,
+            entity_slug="test-artist",
+            entity_id="654321",
+            page=1,
+            limit=LimitEnum.TEN
+        )
+
+        # Vérifier la structure du résultat
+        assert isinstance(result, BeatportReleasesResult)
+        
+        # Vérifier les releases
+        assert len(result.releases) == 1
+        
+        # Vérifier que les facets sont None ou vides
+        assert result.facets is None or len(result.facets.fields.genre) == 0

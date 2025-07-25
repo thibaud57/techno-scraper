@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from app.core.config import settings
 from app.core.errors import ResourceNotFoundException, ParsingException, ScraperException
 from app.main import app
-from tests.integration.mocks.soundcloud_mocks_integration import (
+from tests.integration.mocks import (
     mock_soundcloud_search_data_integration,
     mock_social_links_integration,
     mock_soundcloud_profile_integration,

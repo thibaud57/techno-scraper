@@ -8,7 +8,7 @@ from app.core.errors import (ParsingException, ResourceNotFoundException,
 from app.core.security import get_api_key
 from app.models import (BeatportSearchResult, ErrorResponse,
                         LimitEnum, Release)
-from app.models.beatport_models import BeatportEntityType, BeatportReleaseEntityType
+from app.models.beatport_models import BeatportEntityType, BeatportReleaseEntityType, BeatportReleasesResult
 from app.scrapers import BeatportReleasesScraper, BeatportSearchScraper
 
 # Création du router
@@ -65,9 +65,9 @@ async def search(
 
 @router.get(
     "/{entity_type}/{entity_slug}/releases",
-    response_model=List[Release],
+    response_model=BeatportReleasesResult,
     summary="Récupérer les releases d'une entité Beatport",
-    description="Récupère les releases d'un artiste ou label Beatport à partir de son slug, ID et type avec options de pagination et filtrage par date",
+    description="Récupère les releases d'un artiste ou label Beatport à partir de son slug, ID et type avec options de pagination et filtrage par date, incluant les facets de filtrage",
 )
 async def get_entity_releases(
         entity_type: BeatportReleaseEntityType,
@@ -80,7 +80,7 @@ async def get_entity_releases(
 ):
     try:
         scraper = BeatportReleasesScraper()
-        releases = await scraper.scrape(
+        result = await scraper.scrape(
             entity_type=BeatportEntityType(entity_type),
             entity_slug=entity_slug,
             entity_id=entity_id,
@@ -89,7 +89,7 @@ async def get_entity_releases(
             start_date=start_date,
             end_date=end_date
         )
-        return releases
+        return result
     except ResourceNotFoundException as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

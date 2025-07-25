@@ -57,27 +57,6 @@ def mock_soundcloud_search_data_integration():
 
 
 @pytest.fixture
-def mock_soundcloud_webprofiles_data_integration():
-    """
-    Données de webprofiles SoundCloud pour les tests d'intégration
-    """
-    return [
-        {
-            "url": "https://instagram.com/test_user_integration",
-            "network": "instagram"
-        },
-        {
-            "url": "https://facebook.com/test_user_integration",
-            "network": "facebook"
-        },
-        {
-            "url": "https://example-integration.com",
-            "network": "personal"
-        }
-    ]
-
-
-@pytest.fixture
 def mock_social_links_integration():
     """
     Liens sociaux pour les tests d'intégration

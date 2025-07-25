@@ -1,9 +1,9 @@
 from unittest.mock import patch
 
 import pytest
-from datetime import date
+
 from app.models import Release, Track, BeatportSearchResult, ArtistProfile
-from app.models.beatport_models import BeatportEntityType
+from app.models.beatport_models import BeatportReleasesResult
 from app.models.pagination_models import LimitEnum
 
 
@@ -152,7 +152,7 @@ def mock_beatport_releases_integration():
         track_count=3
     )
 
-    return [release1, release2]
+    return BeatportReleasesResult(releases=[release1, release2])
 
 
 @pytest.fixture
@@ -170,4 +170,4 @@ def patch_beatport_releases_scraper():
     Patch le scraper de releases Beatport pour les tests d'intégration.
     """
     with patch("app.scrapers.BeatportReleasesScraper.scrape") as mock_scrape:
-        yield mock_scrape 
+        yield mock_scrape

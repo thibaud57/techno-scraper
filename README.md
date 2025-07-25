@@ -15,7 +15,7 @@ Techno-scraper est une API FastAPI qui permet de récupérer des données de dif
 
 ### Beatport
 - **Recherche** : Extraction de données pour les artistes, labels, releases et tracks
-- **Releases par artiste/label** : Récupération des sorties musicales d'un artiste ou d'un label avec filtrage par date et pagination
+- **Releases par artiste/label** : Récupération des sorties musicales d'un artiste ou d'un label avec filtrage par date, pagination et facets de genres
 
 ### À venir
 - **Bandcamp** : Informations sur les artistes et leurs albums

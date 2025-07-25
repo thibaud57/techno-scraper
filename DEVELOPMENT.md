@@ -34,7 +34,16 @@ Le projet techno-scraper est une API FastAPI conçue pour scraper des données d
     - Tests d'intégration des endpoints API
     - Mocks pour les réponses externes
 
-### Modifications récentes (25/07/2025)
+### Modifications récentes (25/07/2025) Beatport
+
+-   **Amélioration du scraper Beatport releases avec extraction des facets**
+    - Ajout de l'extraction des facets de genres depuis l'API Beatport
+    - Nouveau modèle `BeatportReleasesResult` incluant releases et facets
+    - Structure de retour enrichie : `{"releases": [...], "facets": {"fields": {"genre": [...]}}}`
+    - Tests complets pour l'extraction des facets avec et sans données
+    - Mise à jour des tests d'intégration pour la nouvelle structure de réponse
+
+### Modifications précédentes (25/07/2025) Soundcloud
 
 -   **Refactorisation majeure de l'architecture SoundCloud**
     - Implémentation de l'authentification OAuth 2.1 avec Client Credentials Flow

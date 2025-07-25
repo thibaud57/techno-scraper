@@ -89,5 +89,5 @@ class SoundcloudMappingUtils:
                 if social_link:
                     social_links.append(social_link)
                 else:
-                    logger.debug(f"Réseau social non reconnu: {network}")
+                    logger.warning(f"Réseau social non reconnu: {network}")
         return social_links

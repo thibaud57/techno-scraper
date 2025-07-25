@@ -6,7 +6,7 @@ from app.core.errors import ResourceNotFoundException, ParsingException, Scraper
 from app.main import app
 from app.models.beatport_models import BeatportEntityType, BeatportReleaseEntityType
 from app.models.pagination_models import LimitEnum
-from tests.integration.mocks.beatport_mocks_integration import (
+from tests.integration.mocks import (
     mock_beatport_search_result_integration,
     mock_beatport_empty_search_result_integration,
     mock_beatport_releases_integration,
@@ -154,12 +154,14 @@ class TestBeatportRoutes:
         assert response.status_code == 200
 
         data = response.json()
-        assert len(data) == 2
-        assert data[0]["id"] == 12345
-        assert data[0]["title"] == "Test Release 1"
-        assert data[0]["track_count"] == 5
-        assert data[1]["id"] == 67890
-        assert data[1]["label"]["name"] == "Test Label 2"
+        assert "releases" in data
+        assert "facets" in data
+        assert len(data["releases"]) == 2
+        assert data["releases"][0]["id"] == 12345
+        assert data["releases"][0]["title"] == "Test Release 1"
+        assert data["releases"][0]["track_count"] == 5
+        assert data["releases"][1]["id"] == 67890
+        assert data["releases"][1]["label"]["name"] == "Test Label 2"
 
     def test_get_releases_with_pagination_and_dates_integration(self, patch_beatport_releases_scraper,
                                                                 mock_beatport_releases_integration):

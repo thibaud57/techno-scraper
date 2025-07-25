@@ -7,7 +7,7 @@ from app.models import LimitEnum
 from app.models.beatport_models import BeatportEntityType
 from app.scrapers.beatport.beatport_search_scraper import BeatportSearchScraper
 from tests.mocks.beatport_mocks import (
-    BEATPORT_SEARCH_RESPONSE_IMPROVED,
+    BEATPORT_SEARCH_RESPONSE,
     BEATPORT_404_RESPONSE,
     mock_beatport_response_factory
 )
@@ -22,7 +22,7 @@ class TestBeatportSearchScraper:
     @pytest.mark.asyncio
     @patch('app.scrapers.base_scraper.BaseScraper.fetch', new_callable=AsyncMock)
     async def test_scrape_search_success(self, mock_fetch, scraper, mock_beatport_response_factory):
-        mock_response = mock_beatport_response_factory(html=BEATPORT_SEARCH_RESPONSE_IMPROVED)
+        mock_response = mock_beatport_response_factory(html=BEATPORT_SEARCH_RESPONSE)
         mock_fetch.return_value = mock_response
         
         # Appeler la méthode scrape
@@ -56,7 +56,7 @@ class TestBeatportSearchScraper:
     @pytest.mark.asyncio
     @patch('app.scrapers.base_scraper.BaseScraper.fetch', new_callable=AsyncMock)
     async def test_scrape_search_with_entity_filter(self, mock_fetch, scraper, mock_beatport_response_factory):
-        mock_response = mock_beatport_response_factory(html=BEATPORT_SEARCH_RESPONSE_IMPROVED)
+        mock_response = mock_beatport_response_factory(html=BEATPORT_SEARCH_RESPONSE)
         mock_fetch.return_value = mock_response
         
         # Appeler la méthode scrape avec un filtre sur les artistes

@@ -20,5 +20,5 @@ class PaginationService:
             return results[start_idx:end_idx]
         else:
             # Si la page demandée dépasse le nombre de résultats disponibles, retourner une liste vide
-            logger.debug(f"Page {page} demandée mais seulement {len(results)} résultats disponibles")
+            logger.warning(f"Page {page} demandée mais seulement {len(results)} résultats disponibles")
             return []
