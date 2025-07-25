@@ -1,8 +1,10 @@
 from unittest.mock import patch
 
 from app.models import SoundcloudProfile, LimitEnum
+from app.core.config import settings
 from app.scrapers.soundcloud.soundcloud_mapping_utils import SOUNDCLOUD_API_URL, SOUNDCLOUD_BASE_URL, \
-    SOUNDCLOUD_CLIENT_ID, SoundcloudMappingUtils
+    SoundcloudMappingUtils
+from tests.mocks.soundcloud_mocks import mock_soundcloud_client_id
 
 
 class TestSoundcloudMappingUtils:
@@ -16,7 +18,7 @@ class TestSoundcloudMappingUtils:
 
         assert f"{SOUNDCLOUD_API_URL}/search/users" in url
         assert f"q={encoded_query}" in url
-        assert f"client_id={SOUNDCLOUD_CLIENT_ID}" in url
+        assert f"client_id=test_client_id" in url
         assert f"limit={limit.value}" in url
         assert f"offset={(page - 1) * limit.value}" in url
 
@@ -26,7 +28,7 @@ class TestSoundcloudMappingUtils:
         url = SoundcloudMappingUtils.build_api_user_url(user_id)
 
         assert f"{SOUNDCLOUD_API_URL}/users/soundcloud:users:{user_id}" in url
-        assert f"client_id={SOUNDCLOUD_CLIENT_ID}" in url
+        assert f"client_id=test_client_id" in url
 
     def test_build_api_webprofiles_url(self):
         user_id = 123456
@@ -34,7 +36,7 @@ class TestSoundcloudMappingUtils:
         url = SoundcloudMappingUtils.build_api_webprofiles_url(user_id)
 
         assert f"{SOUNDCLOUD_API_URL}/users/soundcloud:users:{user_id}/web-profiles" in url
-        assert f"client_id={SOUNDCLOUD_CLIENT_ID}" in url
+        assert f"client_id=test_client_id" in url
 
     def test_build_profile(self, mock_social_links):
         user_data = {

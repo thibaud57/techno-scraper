@@ -18,6 +18,10 @@ class Settings(BaseModel):
 
     # Sécurité
     API_KEY: str = os.getenv("API_KEY", "your-api-key-here")
+    
+    # SoundCloud API
+    SOUNDCLOUD_CLIENT_ID: str = os.getenv("SOUNDCLOUD_CLIENT_ID", "your-soundcloud-client-id-here")
+    SOUNDCLOUD_CLIENT_SECRET: str = os.getenv("SOUNDCLOUD_CLIENT_SECRET", "your-soundcloud-client-secret-here")
 
     # Serveur
     HOST: str = os.getenv("HOST", "0.0.0.0")

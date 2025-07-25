@@ -8,13 +8,13 @@ except ImportError:
     PYCOUNTRY_AVAILABLE = False
 
 from app.models import LimitEnum, SocialLink, SoundcloudProfile, Track
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
 # Constantes pour l'API SoundCloud
 SOUNDCLOUD_BASE_URL = "https://soundcloud.com"
 SOUNDCLOUD_API_URL = "https://api-v2.soundcloud.com"
-SOUNDCLOUD_CLIENT_ID = "EjkRJG0BLNEZquRiPZYdNtJdyGtTuHdp"
 
 class SoundcloudMappingUtils:
     """Utilitaires pour mapper les données SoundCloud vers nos modèles"""
@@ -22,15 +22,15 @@ class SoundcloudMappingUtils:
     @staticmethod
     def build_api_url_with_pagination(encoded_query: str, page: int, limit: LimitEnum) -> str:
         offset = (page - 1) * limit.value
-        return f"{SOUNDCLOUD_API_URL}/search/users?q={encoded_query}&client_id={SOUNDCLOUD_CLIENT_ID}&limit={limit.value}&offset={offset}"
+        return f"{SOUNDCLOUD_API_URL}/search/users?q={encoded_query}&client_id={settings.SOUNDCLOUD_CLIENT_ID}&limit={limit.value}&offset={offset}"
 
     @staticmethod
     def build_api_user_url(user_id: int) -> str:
-        return f"{SOUNDCLOUD_API_URL}/users/soundcloud:users:{user_id}?client_id={SOUNDCLOUD_CLIENT_ID}"
+        return f"{SOUNDCLOUD_API_URL}/users/soundcloud:users:{user_id}?client_id={settings.SOUNDCLOUD_CLIENT_ID}"
 
     @staticmethod
     def build_api_webprofiles_url(user_id: int) -> str:
-        return f"{SOUNDCLOUD_API_URL}/users/soundcloud:users:{user_id}/web-profiles?client_id={SOUNDCLOUD_CLIENT_ID}"
+        return f"{SOUNDCLOUD_API_URL}/users/soundcloud:users:{user_id}/web-profiles?client_id={settings.SOUNDCLOUD_CLIENT_ID}"
 
     @staticmethod
     def build_profile(

@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 
 from app.models import SocialLink
 from tests.mocks.http_mocks import mock_http_response_factory
@@ -90,3 +91,12 @@ def mock_social_links():
         SocialLink(platform="instagram", url="https://instagram.com/test_user"),
         SocialLink(platform="website", url="https://example.com")
     ]
+
+
+@pytest.fixture(autouse=True)
+def mock_soundcloud_client_id():
+    """
+    Mock pour le client ID SoundCloud dans les tests
+    """
+    with patch('app.core.config.settings.SOUNDCLOUD_CLIENT_ID', 'test_client_id'):
+        yield
