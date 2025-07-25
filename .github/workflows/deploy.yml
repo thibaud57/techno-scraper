@@ -70,6 +70,10 @@ jobs:
 
                       # User-Agent (optionnel, "random" pour générer aléatoirement)
                       USER_AGENT=${{ vars.USER_AGENT }}
+
+                      # Configuration API SoundCloud
+                      SOUNDCLOUD_CLIENT_ID=${{ secrets.SOUNDCLOUD_CLIENT_ID }}
+                      SOUNDCLOUD_CLIENT_SECRET=${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
                       EOL
 
                       # Rendre le script de déploiement exécutable
