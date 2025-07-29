@@ -27,8 +27,6 @@ class SoundcloudProfileScraper(BaseScraper):
             return_exceptions=True
         )
 
-        print(profile_data)
-
         # Gérer les erreurs du profil
         if isinstance(profile_data, Exception):
             raise profile_data

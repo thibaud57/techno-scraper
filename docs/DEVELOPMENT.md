@@ -2,39 +2,39 @@
 
 Ce document résume l'état actuel du projet, les fonctionnalités implémentées, et les prochaines étapes prévues.
 
-## État actuel du projet (25/07/2025)
+## État actuel du projet (29/07/2025)
 
-Le projet techno-scraper est une API FastAPI conçue pour scraper des données de différents sites liés à la musique techno (Soundcloud, Beatport, Bandcamp, Facebook, Instagram, Songstats). L'API est destinée à être utilisée par n8n pour automatiser des workflows de récupération de données.
+Le projet techno-scraper est une API FastAPI conçue pour scraper des données de différents sites liés à la musique techno (Soundcloud, Beatport, Bandcamp, ...). 
+L'API est destinée à être utilisée par n8n pour automatiser des workflows de récupération de données.
 
-### Structure implémentée
+### Plateformes supportées
 
--   Architecture en couches (routers, services, models, scrapers)
--   Configuration Docker pour le développement local et le déploiement
--   Configuration GitHub Actions pour le déploiement automatique sur VPS
--   Scripts utilitaires pour le développement local
--   Suite complète de tests unitaires et d'intégration
+- **Soundcloud** : Recherche de profils, données d'artistes, réseaux sociaux
+- **Beatport** : Recherche, releases avec facets de genres
+- **Bandcamp** : Recherche d'artistes et labels
 
-### Fonctionnalités implémentées
+### Infrastructure technique
 
--   Structure de base de l'application FastAPI
--   Authentification par clé API
--   Gestion des erreurs et des retries
--   Modèles de données pour les résultats et la pagination
--   Support des scrapers modulaires avec BaseScraper
--   Service de retries
--   Scraper pour Soundcloud
-    - Recherche de profils
-    - Profil (par ID)
-    - Réseaux sociaux
--   Scraper pour Beatport
-    - Recherche
-    - Releases (artiste/label)
--   Infrastructure de tests
-    - Tests unitaires pour tous les scrapers
-    - Tests d'intégration des endpoints API
-    - Mocks pour les réponses externes
+- Architecture en couches avec scrapers modulaires
+- Authentification par clé API
+- Tests unitaires et d'intégration complets
+- CI/CD avec GitHub Actions
 
-### Modifications récentes (25/07/2025) Beatport
+### Modifications récentes (29/07/2025) Bandcamp
+
+-   **Implémentation du scraper Bandcamp**
+    - Nouveau scraper de recherche avec support des artistes et labels (`BandcampSearchScraper`)
+    - Modèles de données spécialisés : `BandcampBandProfile`, `BandcampSearchResult`, `BandcampEntityType`
+    - Router API complet avec endpoint `/bandcamp/search` et gestion d'erreurs
+    - Utilitaires de mapping dédiés dans `bandcamp_mapping_utils.py`
+    - Support de la pagination avec paramètre `page`
+    - Filtrage par type d'entité (artistes/labels vs pistes)
+    - Extraction des métadonnées : nom, URL, localisation, genre
+    - Tests unitaires complets avec mocks pour `BaseScraper.fetch`
+    - Tests d'intégration du router avec validation des réponses API
+    - Architecture cohérente suivant les patterns établis du projet
+
+### Modifications précédentes (25/07/2025) Beatport
 
 -   **Amélioration du scraper Beatport releases avec extraction des facets**
     - Ajout de l'extraction des facets de genres depuis l'API Beatport
@@ -222,63 +222,9 @@ Pour obtenir un profil SoundCloud complet avec ses réseaux sociaux :
 2. Les profils retournés incluent déjà leurs réseaux sociaux grâce à l'optimisation concurrente
 3. Alternativement, utiliser directement l'endpoint profil avec un ID pour obtenir un profil spécifique
 
-## Tests du projet
+## Tests
 
-### Types de tests
-
-- **Tests unitaires** : Couvrent les fonctionnalités individuelles des scrapers et services
-  - Tests des scrapers SoundCloud : mockent les services
-  - Tests des services SoundCloud : mockent les requêtes HTTP
-  - Tests des scrapers Beatport : mockent BaseScraper.fetch
-  - Tests des services génériques : retry, pagination
-
-- **Tests d'intégration** : Vérifient l'interaction entre les différents composants
-  - Tests des endpoints API complets
-  - Validation des réponses API
-  - Scénarios de bout en bout
-  - Mockent au niveau des scrapers (interface publique)
-
-### Architecture de test en couches
-
-L'architecture de test respecte la séparation des responsabilités :
-
-**Tests unitaires des scrapers :**
-```python
-@patch('app.services.soundcloud.soundcloud_api_service.SoundcloudApiService.get_user')
-```
-
-**Tests unitaires des services :**
-```python
-@patch('httpx.AsyncClient.request')
-```
-
-**Tests d'intégration :**
-```python
-@patch('app.scrapers.soundcloud.soundcloud_profile_scraper.SoundcloudProfileScraper.scrape')
-```
-
-### Optimisations des mocks et fixtures
-
-- Suppression des fixtures inutilisées (`mock_social_links`)
-- Utilisation ciblée de `mock_soundcloud_credentials` (pas d'`autouse=True`)
-- Mocks optimisés sans redondances
-- Structure cohérente pour tous les tests, facilitant la maintenance
-
-### Exécution des tests
-
-```bash
-# Exécuter tous les tests
-pytest
-
-# Exécuter avec rapport de couverture
-pytest --cov=app
-
-# Exécuter uniquement les tests unitaires
-pytest tests/unit
-
-# Exécuter uniquement les tests d'intégration
-pytest tests/integration
-```
+Architecture de test en couches avec mocks appropriés selon le niveau. Voir [tests/README.md](../tests/README.md) pour plus de détails.
 
 ## Prochaines étapes
 
@@ -286,15 +232,13 @@ pytest tests/integration
 
 1. **Implémentation des scrapers restants** :
 
-    - Bandcamp
-    - Facebook
-    - Instagram
+    - Discogs
     - Songstats
 
 2. **Amélioration de la gestion des erreurs** :
 
     - Logging plus détaillé
-    - Mécanismes de retry plus sophistiqués
+    - Mécanismes de retry plus sophistiqués ?
 
 ### Priorité moyenne
 
@@ -310,76 +254,15 @@ pytest tests/integration
 ### Priorité basse
 
 1. **Optimisations** :
-    - Mise en cache des résultats fréquemment demandés
-    - Parallélisation des requêtes
+    - Parallélisation des requêtes plus poussé ?
 
 ## Workflow de développement
 
-1. **Développement local** :
-
-    ```bash
-    setup_venv.bat  # ou ./setup_venv.sh sur Linux/macOS
-    ```
-
-2. **Exécution des tests locaux** :
-
-    ```bash
-    # Lancer tous les tests
-    pytest
-    
-    # Lancer les tests avec rapport de couverture
-    pytest --cov=app
-    ```
-
-3. **Test avec Docker** :
-
-    ```bash
-    docker-compose up -d
-    ```
-
-4. **Déploiement** :
-    - Push sur GitHub (branche master)
-    - GitHub Actions exécute workflow deploy.yml qui déclenche:
-      - test.yml pour les tests et le linting
-      - build.yml pour la construction de l'image
-    - Si tous les tests passent, déploiement automatique sur le VPS
-
-## Intégration continue
-
-Le projet utilise GitHub Actions pour l'automatisation des tests et du déploiement :
-
-- **Workflow test.yml** : Exécute les tests et vérifications à chaque pull request
-  - Exécution des tests unitaires et d'intégration
-  - Génération de rapports de couverture de code
-  - Peut être exécuté manuellement via manual-test.yml
-
-- **Workflow build.yml** : Construction de l'image Docker
-  - Construction de l'image Docker avec méta-données
-  - Publication sur GitHub Container Registry
-
-- **Workflow deploy.yml** : Orchestration du déploiement complet
-  - Déclenché par un push sur la branche master
-  - Appelle test.yml puis build.yml
-  - Déploie sur le VPS via SSH si les étapes précédentes réussissent
-
-## Notes techniques
-
--   L'API renvoie uniquement des données JSON, la persistance est gérée par l'appelant (n8n)
--   L'authentification se fait via une clé API dans le header `X-API-Key`
--   Les scrapers utilisent un mécanisme de retry avec backoff exponentiel
--   L'API est conçue pour être accessible uniquement en loopback sur le VPS
--   SoundCloud supporte CORS pour les requêtes cross-domain
--   Les erreurs de l'API SoundCloud sont gérées via les codes HTTP standards (400, 401, 403, etc.)
--   Les scrapers utilisent asyncio pour exécuter des requêtes en parallèle et améliorer les performances
--   Les profils et leurs réseaux sociaux sont récupérés simultanément grâce à l'exécution concurrente
--   Les tests utilisent pytest-mock et pytest-httpx pour simuler les requêtes externes
--   L'intégration continue garantit la qualité du code avant chaque déploiement
+1. **Local** : `setup_venv.bat` → `pytest` → `docker-compose up -d`
+2. **Déploiement** : Push sur master → GitHub Actions (test → build → deploy)
 
 ## Ressources
 
--   [Architecture détaillée](architecture.md)
--   [Documentation FastAPI](https://fastapi.tiangolo.com/)
--   [Documentation n8n](https://docs.n8n.io/)
--   [Documentation API SoundCloud](https://developers.soundcloud.com/docs/api/guide)
--   [Documentation pytest](https://docs.pytest.org/)
--   [GitHub Actions](https://docs.github.com/en/actions)
+- [Architecture détaillée](architecture.md) - Documentation technique complète
+- [Documentation API SoundCloud](https://developers.soundcloud.com/docs/api/guide)
+- [GitHub Actions](.github/workflows/) - Workflows CI/CD

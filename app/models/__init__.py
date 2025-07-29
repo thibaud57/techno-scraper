@@ -4,6 +4,6 @@ from .artist_profile import ArtistProfile
 from .release import Release
 from .schemas import ErrorResponse, SuccessResponse
 from .pagination_models import LimitEnum, Pagination
-from .bandcamp_models import BandcampProfile, BandcampSearchResult
+from .bandcamp_models import BandcampBandProfile, BandcampSearchResult, BandcampEntityType
 from .beatport_models import BeatportProfile, BeatportSearchResult
 from .soundcloud_models import SoundcloudProfile, SoundcloudSearchResult

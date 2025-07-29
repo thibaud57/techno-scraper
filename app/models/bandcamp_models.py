@@ -1,14 +1,21 @@
+from enum import Enum
 from typing import List, Optional
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 
-from app.models import ArtistProfile, Pagination, Release
-
-
-class BandcampProfile(ArtistProfile):
-    releases: Optional[List[Release]] = None
+from app.models import ArtistProfile, Track
 
 
-class BandcampSearchResult(Pagination):
-    profiles: List[BandcampProfile] = Field(default_factory=list)
-    releases: List[Release] = Field(default_factory=list)
+class BandcampEntityType(str, Enum):
+    BANDS = "b"  # Artistes et labels
+    TRACKS = "t"  # Pistes
+
+
+class BandcampBandProfile(ArtistProfile):
+    location: Optional[str] = None
+    genre: Optional[str] =  None
+
+
+class BandcampSearchResult(BaseModel):
+    bands: List[BandcampBandProfile] = Field(default_factory=list)
+    tracks: List[Track] = Field(default_factory=list)

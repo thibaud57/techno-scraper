@@ -21,6 +21,13 @@ from .soundcloud_mocks_integration import (
     patch_soundcloud_webprofiles_scraper
 )
 
+# Import des fixtures Bandcamp pour l'intégration
+from .bandcamp_mocks_integration import (
+    mock_bandcamp_search_result_integration,
+    mock_bandcamp_empty_search_result_integration,
+    patch_bandcamp_search_scraper
+)
+
 __all__ = [
     # Beatport
     'mock_beatport_search_result_integration',
@@ -35,5 +42,10 @@ __all__ = [
     'mock_social_links_integration',
     'patch_soundcloud_profile_scraper',
     'patch_soundcloud_search_scraper',
-    'patch_soundcloud_webprofiles_scraper'
+    'patch_soundcloud_webprofiles_scraper',
+    
+    # Bandcamp
+    'mock_bandcamp_search_result_integration',
+    'mock_bandcamp_empty_search_result_integration',
+    'patch_bandcamp_search_scraper'
 ]

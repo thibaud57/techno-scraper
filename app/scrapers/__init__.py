@@ -9,3 +9,8 @@ from app.scrapers.beatport import (
     BeatportReleasesScraper,
     BeatportMappingUtils
 )
+
+from app.scrapers.bandcamp import (
+    BandcampSearchScraper,
+    BandcampMappingUtils
+)

@@ -6,7 +6,7 @@ Ce document décrit l'architecture du projet techno-scraper, une API FastAPI pou
 
 Le projet techno-scraper vise à :
 
--   Scraper des données de sites musicaux (Soundcloud, Beatport, Bandcamp, Facebook, Instagram, Songstats)
+-   Scraper des données de sites musicaux (Soundcloud, Beatport, Bandcamp, ...)
 -   Exposer ces données via une API FastAPI
 -   Fonctionner en local et en production via Docker
 -   Être utilisé par n8n sur un VPS
@@ -28,12 +28,9 @@ techno-scraper/
 │   │   └── schemas.py           # Schémas de données communs
 │   ├── routers/                 # Endpoints API
 │   │   ├── __init__.py
-│   │   ├── soundcloud.py        # Router pour Soundcloud
-│   │   ├── beatport.py          # Router pour Beatport
-│   │   ├── bandcamp.py          # Router pour Bandcamp
-│   │   ├── facebook.py          # Router pour Facebook
-│   │   ├── instagram.py         # Router pour Instagram
-│   │   └── songstats.py         # Router pour Songstats
+│   │   ├── soundcloud_router.py  # Router pour Soundcloud
+│   │   ├── beatport_router.py    # Router pour Beatport
+│   │   ├── bandcamp_router.py    # Router pour Bandcamp
 │   ├── services/                # Logique métier et services
 │   │   ├── __init__.py
 │   │   ├── retry_service.py     # Service de retry avec backoff
@@ -51,27 +48,30 @@ techno-scraper/
 │       │   ├── soundcloud_search_profile_scraper.py # Scraping de recherche
 │       │   ├── soundcloud_webprofiles_scraper.py    # Scraping des réseaux sociaux
 │       │   └── soundcloud_mapping_utils.py          # Utilitaires de mapping
-│       ├── beatport/            # Scraper pour Beatport
+│       ├── beatport/            # Scrapers pour Beatport
 │       │   ├── __init__.py
-│       │   ├── search.py        # Scraping de recherche
-│       │   ├── releases.py      # Scraping de releases (artistes/labels)
-│       │   └── mapping_utils.py # Utilitaires de mapping des données Beatport
-│       ├── bandcamp/            # Et ainsi de suite pour les autres sites...
-│       ├── facebook/
-│       ├── instagram/
-│       └── songstats/
+│       │   ├── beatport_search_scraper.py    # Scraping de recherche
+│       │   ├── beatport_releases_scraper.py  # Scraping de releases (artistes/labels)
+│       │   └── beatport_mapping_utils.py     # Utilitaires de mapping Beatport
+│       ├── bandcamp/            # Scrapers pour Bandcamp
+│       │   ├── __init__.py
+│       │   ├── bandcamp_search_scraper.py    # Scraping de recherche d'artistes/labels
+│       │   └── bandcamp_mapping_utils.py     # Utilitaires de mapping Bandcamp
 ├── tests/                       # Tests unitaires et d'intégration
 │   ├── __init__.py
 │   ├── conftest.py              # Configuration des tests
 │   ├── integration/             # Tests d'intégration
 │   │   ├── mocks/               # Mocks pour les tests d'intégration
 │   │   ├── test_api_routes.py   # Tests des routes API générales
+│   │   ├── test_bandcamp_router.py # Tests des routes Bandcamp
+│   │   ├── test_beatport_router.py  # Tests des routes Beatport
 │   │   └── test_soundcloud_router.py # Tests des routes Soundcloud
 │   ├── mocks/                   # Mocks réutilisables
 │   ├── scrapers/                # Tests unitaires des scrapers
-│   │   ├── soundcloud/          # Tests pour Soundcloud
+│   │   ├── bandcamp/            # Tests pour Bandcamp
 │   │   ├── beatport/            # Tests pour Beatport
-│   │   └── ...                  # Tests pour autres scrapers
+│   │   ├── soundcloud/          # Tests pour Soundcloud
+│   │   └── conftest.py          # Configuration partagée des scrapers
 │   └── services/                # Tests des services
 │       ├── soundcloud/          # Tests des services SoundCloud
 │       ├── test_retry_service.py # Tests du service de retry
@@ -214,6 +214,8 @@ flowchart TD
     -   Utilisation des services SoundCloud dédiés pour l'authentification et les appels API
     -   Séparation claire entre profils, recherche et réseaux sociaux
     -   Gestion d'erreurs robuste avec exceptions typées
+-   **scrapers/beatport/**: Scrapers Beatport avec extraction JSON et gestion des facets  
+-   **scrapers/bandcamp/**: Scrapers Bandcamp avec parsing HTML et filtrage par type d'entité
 -   Scrapers spécifiques à chaque site, organisés par fonctionnalité
 
 ### 4. Test Layer
@@ -225,6 +227,7 @@ flowchart TD
 -   **tests/scrapers/**: Tests unitaires pour les scrapers
     -   Tests SoundCloud: mockent les services SoundCloud
     -   Tests Beatport: mockent BaseScraper.fetch
+    -   Tests Bandcamp: mockent BaseScraper.fetch
 -   **tests/services/**: Tests unitaires pour les services
     -   Tests services SoundCloud: mockent les requêtes HTTP
     -   Tests services génériques: retry, pagination
@@ -266,9 +269,7 @@ flowchart TD
     -   Workflows: Tests des scénarios de bout en bout
 -   **Mocks**: Simulation des API externes pour des tests reproductibles
 
-## Prochaines étapes
+## Informations complémentaires
 
-1. Implémentation des scrapers restants
-2. Amélioration de la documentation API
-3. Mise en place du monitoring
-4. Optimisations de performance (cache, parallélisation)
+- **Journal de développement** : [DEVELOPMENT.md](DEVELOPMENT.md) - Modifications récentes et prochaines étapes
+- **Guide d'utilisation** : [../README.md](../README.md) - Installation et utilisation de base
