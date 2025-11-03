@@ -207,7 +207,7 @@ flowchart TD
 ### 0. MCP Layer (Nouveau - Interface moderne)
 
 -   **app/mcp/server.py**: Serveur MCP principal avec gestion des tools
-    -   Communication via stdio (JSON-RPC)
+    -   Communication via HTTP/SSE (Server-Sent Events)
     -   Enregistrement et exécution des tools
     -   Logging et gestion d'erreurs
 -   **app/mcp/tools/**: Définition des MCP tools par plateforme
@@ -305,21 +305,21 @@ flowchart TD
 
 ### Principe
 
-Le MCP (Model Context Protocol) est un protocole standardisé par Anthropic permettant aux agents IA d'interagir avec des outils externes via JSON-RPC sur stdio.
+Le MCP (Model Context Protocol) est un protocole standardisé par Anthropic permettant aux agents IA d'interagir avec des outils externes via HTTP/SSE (Server-Sent Events).
 
 ### Avantages par rapport à REST
 
-- **Intégration native** : Pas besoin de gérer des requêtes HTTP, l'agent appelle directement les tools
+- **Intégration native** : Communication temps-réel avec les agents IA via SSE
 - **Typage fort** : Les paramètres sont validés via JSON Schema
-- **Communication sécurisée** : Via stdio, pas d'exposition réseau nécessaire
-- **Simplification** : Pas besoin de middleware d'authentification, CORS, etc.
+- **Déploiement production** : Compatible Docker et orchestration réseau
+- **Simplification** : Interface unifiée pour tous les agents IA
 
 ### Architecture technique
 
 ```
-Client MCP (Claude Desktop/n8n)
-    ↓ JSON-RPC via stdio
-Serveur MCP (app/mcp/server.py)
+Client MCP (n8n MCP Server Trigger)
+    ↓ HTTP/SSE
+Serveur MCP (app/mcp/server.py - port 8080)
     ↓ Appel Python direct
 MCP Tools (app/mcp/tools/*.py)
     ↓ Appel Python direct

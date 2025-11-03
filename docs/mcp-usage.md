@@ -4,7 +4,7 @@ Ce document décrit comment utiliser le serveur MCP (Model Context Protocol) de 
 
 ## 🎯 Qu'est-ce que MCP ?
 
-MCP (Model Context Protocol) est un protocole standardisé créé par Anthropic pour permettre aux agents IA d'interagir avec des outils externes de manière structurée. Au lieu d'appeler une API REST classique, l'agent communique directement avec le serveur MCP via JSON-RPC.
+MCP (Model Context Protocol) est un protocole standardisé créé par Anthropic pour permettre aux agents IA d'interagir avec des outils externes de manière structurée. Le serveur MCP expose des outils via HTTP/SSE (Server-Sent Events) pour une communication temps-réel avec les agents IA.
 
 ## 📦 Installation
 
@@ -24,45 +24,61 @@ cp .env.example .env
 ```bash
 SOUNDCLOUD_CLIENT_ID=your-soundcloud-client-id
 SOUNDCLOUD_CLIENT_SECRET=your-soundcloud-client-secret
+MCP_PORT=8080  # Port du serveur MCP (optionnel, 8080 par défaut)
 ```
 
 ## 🔧 Configuration
 
-### Pour Claude Desktop
+### Lancement du serveur MCP
 
-1. Localisez votre fichier de configuration Claude Desktop :
-   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-   - **Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
-   - **Linux**: `~/.config/Claude/claude_desktop_config.json`
+Le serveur MCP utilise le transport HTTP/SSE et écoute par défaut sur le port 8080 :
 
-2. Ajoutez la configuration du serveur MCP :
+```bash
+# Lancement local
+python -m app.mcp
 
-```json
-{
-  "mcpServers": {
-    "techno-scraper": {
-      "command": "python",
-      "args": [
-        "-m",
-        "app.mcp"
-      ],
-      "cwd": "/path/to/techno-scraper",
-      "env": {
-        "SOUNDCLOUD_CLIENT_ID": "your-soundcloud-client-id",
-        "SOUNDCLOUD_CLIENT_SECRET": "your-soundcloud-client-secret"
-      }
-    }
-  }
-}
+# Avec Docker
+docker-compose -f docker-compose.dokploy.yml up techno-scraper-mcp
+
+# Le serveur est accessible sur http://localhost:8080/sse
 ```
-
-3. Remplacez `/path/to/techno-scraper` par le chemin absolu vers votre répertoire techno-scraper
-
-4. Redémarrez Claude Desktop
 
 ### Pour n8n
 
-Documentation à venir pour l'intégration avec n8n.
+Le serveur MCP est conçu pour fonctionner avec le node **MCP Server Trigger** de n8n.
+
+#### Configuration dans n8n
+
+1. Dans votre workflow n8n, ajoutez un node **MCP Server Trigger**
+2. Configurez l'URL du serveur MCP :
+   - **Développement local** : `http://techno-scraper-mcp:8080/sse` (via Docker network)
+   - **Production** : `http://techno-scraper-mcp:8080/sse` (via Docker network)
+3. n8n expose ensuite publiquement via : `https://n8n.empiricmind.fr/mcp/techno-scraper-mcp/sse`
+
+#### Architecture réseau
+
+```
+Agent IA (Claude/n8n workflow)
+    ↓
+n8n MCP Server Trigger (https://n8n.empiricmind.fr/mcp/techno-scraper-mcp/sse)
+    ↓
+techno-scraper-mcp container (http://techno-scraper-mcp:8080/sse)
+    ↓
+SoundCloud API
+```
+
+#### Variables d'environnement dans Dokploy
+
+Dans la configuration Dokploy, configurez :
+```bash
+SOUNDCLOUD_CLIENT_ID=your-soundcloud-client-id
+SOUNDCLOUD_CLIENT_SECRET=your-soundcloud-client-secret
+MCP_PORT=8080  # Optionnel, 8080 par défaut
+```
+
+### Pour Claude Desktop (stdio local)
+
+**Note** : Le serveur MCP actuel utilise HTTP/SSE et n'est pas compatible avec Claude Desktop en mode stdio local. Pour une utilisation avec Claude Desktop, une configuration client HTTP sera nécessaire (à venir).
 
 ## 🛠️ Tools disponibles
 
@@ -140,11 +156,13 @@ Peux-tu récupérer le profil SoundCloud de l'utilisateur avec l'ID 12345678 ?
 ### Tester le serveur MCP localement
 
 ```bash
-# Lancer le serveur MCP en mode standalone
+# Lancer le serveur MCP
 python -m app.mcp
-```
 
-Le serveur attend des entrées JSON-RPC sur stdin et retourne les résultats sur stdout.
+# Le serveur écoute sur http://localhost:8080/sse
+# Vérifier que le serveur répond
+curl -f http://localhost:8080/sse
+```
 
 ### Exécuter les tests unitaires
 
@@ -160,24 +178,31 @@ pytest
 
 ### Logs
 
-Le serveur MCP log les informations importantes. Pour augmenter le niveau de verbosité :
+Le serveur MCP log les informations importantes. Les logs apparaissent dans la sortie standard :
 
-```python
-# Dans app/mcp/server.py, modifier le niveau de logging
-logging.basicConfig(
-    level=logging.DEBUG,  # Au lieu de INFO
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
+```bash
+# Lancer avec des logs détaillés
+python -m app.mcp
+
+# Exemple de logs :
+# 2025-01-03 10:30:45 - INFO - Starting MCP server on http://0.0.0.0:8080/sse
 ```
 
 ### Vérifier que le serveur fonctionne
 
 ```bash
-# Le serveur doit démarrer sans erreur
+# Le serveur doit démarrer sans erreur et afficher :
 python -m app.mcp
+# INFO:     Started server process [12345]
+# INFO:     Waiting for application startup.
+# INFO:     Application startup complete.
+# INFO:     Uvicorn running on http://0.0.0.0:8080
 
-# Dans un autre terminal, vous pouvez envoyer une requête JSON-RPC
-echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' | python -m app.mcp
+# Healthcheck
+curl -f http://localhost:8080/sse
+
+# Logs Docker
+docker logs techno-scraper-mcp
 ```
 
 ## 📋 Roadmap
@@ -205,8 +230,9 @@ echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' | python -m app.mcp
 ## 🔒 Sécurité
 
 - Les clés API sont passées via variables d'environnement
-- Le serveur MCP ne nécessite pas d'authentification externe (communication via stdio)
-- Pour une utilisation en production, considérer l'utilisation de secrets managers
+- Le serveur MCP est accessible uniquement via le réseau Docker interne (pas d'exposition publique directe)
+- n8n gère l'exposition publique et l'authentification
+- Pour une utilisation en production, utiliser des secrets managers (ex: Doppler, Vault)
 
 ## 🆘 Support
 

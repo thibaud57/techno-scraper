@@ -1,10 +1,14 @@
 import json
 import logging
+import os
 from typing import Any
 
 from mcp.server import Server
-from mcp.server.stdio import stdio_server
+from mcp.server.sse import SseServerTransport
 from mcp.types import TextContent
+from starlette.applications import Starlette
+from starlette.responses import Response
+from starlette.routing import Mount, Route
 
 from app.mcp.tools import (
     soundcloud_search_profiles_tool,
@@ -42,22 +46,27 @@ def create_mcp_server() -> Server:
     return server
 
 
-async def main():
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    )
+mcp_server = create_mcp_server()
+sse_transport = SseServerTransport("/messages/")
 
-    server = create_mcp_server()
 
-    async with stdio_server() as (read_stream, write_stream):
-        await server.run(
+async def handle_sse(request):
+    async with sse_transport.connect_sse(
+        request.scope,
+        request.receive,
+        request._send,
+    ) as (read_stream, write_stream):
+        await mcp_server.run(
             read_stream,
             write_stream,
-            server.create_initialization_options(),
+            mcp_server.create_initialization_options(),
         )
+    return Response()
 
 
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+routes = [
+    Route("/sse", endpoint=handle_sse, methods=["GET"]),
+    Mount("/messages/", app=sse_transport.handle_post_message),
+]
+
+app = Starlette(routes=routes)

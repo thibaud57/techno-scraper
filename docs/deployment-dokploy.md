@@ -87,7 +87,7 @@ Dans l'onglet **Networks**, s'assurer que `dokploy-network` est bien sélectionn
    - Builder les images Docker (Dockerfile + Dockerfile.mcp)
    - Créer les deux services :
      - `techno-scraper-api` (port 8000 en local)
-     - `techno-scraper-mcp` (pas de port, stdio)
+     - `techno-scraper-mcp` (port 8080 interne, HTTP/SSE)
    - Connecter au réseau `dokploy-network`
 
 ### Étape 6 : Vérifier le déploiement
