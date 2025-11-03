@@ -1,3 +1,6 @@
+# TODO: [MCP Migration - Phase 4] Ce fichier sera remplacé par docker-compose.dokploy.yml
+# Fichier legacy pour déploiement GitHub Actions (obsolète après migration Dokploy)
+
 services:
     techno-scraper:
         image: ghcr.io/${GITHUB_REPOSITORY}:latest

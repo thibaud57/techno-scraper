@@ -1,4 +1,8 @@
-name: Build Docker Image
+# TODO: [Dokploy Migration] Ce workflow est OBSOLÈTE
+# Dokploy build les images Docker localement
+# À SUPPRIMER après confirmation que Dokploy fonctionne correctement
+
+name: Build Docker Image (OBSOLETE - Use Dokploy)
 
 on:
   pull_request:

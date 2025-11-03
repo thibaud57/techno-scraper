@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Service API REST (Legacy - à supprimer en Phase 4)
+  techno-scraper-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: techno-scraper-api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${PORT:-8000}:${PORT:-8000}"
+    environment:
+      - SOUNDCLOUD_CLIENT_ID=${SOUNDCLOUD_CLIENT_ID}
+      - SOUNDCLOUD_CLIENT_SECRET=${SOUNDCLOUD_CLIENT_SECRET}
+      - API_KEY=${API_KEY}
+      - PORT=${PORT:-8000}
+    networks:
+      - dokploy-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-8000}/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Service MCP Server (Nouveau - Production)
+  techno-scraper-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    container_name: techno-scraper-mcp
+    restart: unless-stopped
+    environment:
+      - SOUNDCLOUD_CLIENT_ID=${SOUNDCLOUD_CLIENT_ID}
+      - SOUNDCLOUD_CLIENT_SECRET=${SOUNDCLOUD_CLIENT_SECRET}
+    networks:
+      - dokploy-network
+    # Pas de ports exposés - communication via stdio dans le réseau Docker
+    # Healthcheck basé sur le processus Python
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "app.mcp.server"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  dokploy-network:
+    external: true
+
+# NOTE: Pour Dokploy
+# - Utiliser ce fichier comme "Docker Compose" dans Dokploy
+# - Les variables d'env sont définies dans le panel Dokploy
+# - Le réseau dokploy-network permet la communication avec n8n
+# - Phase 4 : Supprimer le service techno-scraper-api

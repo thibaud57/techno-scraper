@@ -39,22 +39,42 @@ FastAPI, BeautifulSoup4, HTTPX, Pydantic, Docker, pytest
 
 ## ⚡ Démarrage rapide
 
-1. **Docker (recommandé)** :
-   ```bash
-   git clone <repo-url>
-   cd techno-scraper
-   cp .env.example .env  # Configurer vos clés API
-   docker-compose up -d
-   ```
+### 1. Développement local
 
-2. **Local** :
-   ```bash
-   scripts/setup_venv.bat  # Windows
-   ./scripts/setup_venv.sh # Linux/macOS
-   python app/main.py
-   ```
+**Docker Compose** :
+```bash
+git clone <repo-url>
+cd techno-scraper
+cp .env.example .env  # Configurer vos clés API
+docker-compose up -d
+```
 
-3. **Accès** : [http://localhost:8000](http://localhost:8000)
+**Python local** :
+```bash
+scripts/setup_venv.bat  # Windows
+./scripts/setup_venv.sh # Linux/macOS
+python app/main.py      # API REST
+# OU
+python -m app.mcp.server # Serveur MCP
+```
+
+**Accès** : [http://localhost:8000](http://localhost:8000)
+
+### 2. Déploiement production (Dokploy)
+
+Le projet est prêt pour un déploiement automatisé sur Dokploy :
+
+```bash
+# Sur Dokploy :
+# 1. Connecter GitHub à Dokploy
+# 2. Créer un projet "techno-scraper"
+# 3. Ajouter un service Docker Compose
+# 4. Sélectionner docker-compose.dokploy.yml
+# 5. Configurer les variables d'environnement
+# 6. Activer Auto-Deploy
+```
+
+📖 **Guide complet** : [DOKPLOY_DEPLOYMENT.md](./DOKPLOY_DEPLOYMENT.md)
 
 ## ⚙️ Configuration
 
