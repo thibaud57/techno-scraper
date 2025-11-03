@@ -45,11 +45,11 @@ class TestSoundcloudMcpTools:
 
     @pytest.mark.asyncio
     @patch('app.mcp.tools.soundcloud_tools.SoundcloudSearchProfileScraper')
-    async def test_execute_soundcloud_search_with_limit_20(self, mock_scraper_class):
+    async def test_execute_soundcloud_search_with_limit_25(self, mock_scraper_class):
         mock_result = SoundcloudSearchResult(
             total_results=0,
             page=1,
-            limit=LimitEnum.TWENTY,
+            limit=LimitEnum.TWENTY_FIVE,
             profiles=[]
         )
 
@@ -57,9 +57,9 @@ class TestSoundcloudMcpTools:
         mock_scraper.scrape.return_value = mock_result
         mock_scraper_class.return_value = mock_scraper
 
-        result = await execute_soundcloud_search(query="test", page=1, limit=20)
+        result = await execute_soundcloud_search(query="test", page=1, limit=25)
 
-        mock_scraper.scrape.assert_called_once_with(name="test", page=1, limit=LimitEnum.TWENTY)
+        mock_scraper.scrape.assert_called_once_with(name="test", page=1, limit=LimitEnum.TWENTY_FIVE)
 
     @pytest.mark.asyncio
     @patch('app.mcp.tools.soundcloud_tools.SoundcloudSearchProfileScraper')

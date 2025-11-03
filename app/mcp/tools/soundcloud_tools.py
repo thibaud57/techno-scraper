@@ -27,8 +27,8 @@ soundcloud_search_profiles_tool = Tool(
             },
             "limit": {
                 "type": "integer",
-                "description": "Number of results per page: 10, 20, or 50 (default: 10)",
-                "enum": [10, 20, 50],
+                "description": "Number of results per page: 10, 25, or 50 (default: 10)",
+                "enum": [10, 25, 50],
                 "default": 10
             }
         },
@@ -56,8 +56,8 @@ soundcloud_get_profile_tool = Tool(
 async def execute_soundcloud_search(query: str, page: int = 1, limit: int = 10) -> dict[str, Any]:
     try:
         limit_enum = LimitEnum.TEN
-        if limit == 20:
-            limit_enum = LimitEnum.TWENTY
+        if limit == 25:
+            limit_enum = LimitEnum.TWENTY_FIVE
         elif limit == 50:
             limit_enum = LimitEnum.FIFTY
 
