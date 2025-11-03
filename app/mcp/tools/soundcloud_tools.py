@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 soundcloud_search_profiles_tool = Tool(
     name="soundcloud_search_profiles",
-    description="Search for artist profiles on SoundCloud by name or keyword. Returns profile information including bio, location, followers count, and social media links.",
+    description="Search for artist or label profiles on SoundCloud by name or keyword. Returns a list of profiles with id, name, url, avatar_url, bio, location, followers_count, and social_links (Facebook, Instagram, Bandcamp, etc.).",
     inputSchema={
         "type": "object",
         "properties": {
@@ -39,7 +39,7 @@ soundcloud_search_profiles_tool = Tool(
 
 soundcloud_get_profile_tool = Tool(
     name="soundcloud_get_profile",
-    description="Get detailed profile information for a specific SoundCloud user by their user ID. Returns profile data including bio, location, followers count, and social media links.",
+    description="Get detailed profile information for a specific SoundCloud user (artist or label) by their user ID. Returns complete profile data with id, name, url, avatar_url, bio, location, followers_count, and social_links array.",
     inputSchema={
         "type": "object",
         "properties": {

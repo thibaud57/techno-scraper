@@ -13,6 +13,8 @@ from starlette.routing import Mount, Route
 from app.mcp.tools import (
     soundcloud_search_profiles_tool,
     soundcloud_get_profile_tool,
+    beatport_search_tool,
+    beatport_get_label_releases_tool,
 )
 
 logger = logging.getLogger(__name__)
@@ -26,6 +28,8 @@ def create_mcp_server() -> Server:
         return [
             soundcloud_search_profiles_tool,
             soundcloud_get_profile_tool,
+            beatport_search_tool,
+            beatport_get_label_releases_tool,
         ]
 
     @server.call_tool()
@@ -38,6 +42,16 @@ def create_mcp_server() -> Server:
         elif name == "soundcloud_get_profile":
             from app.mcp.tools.soundcloud_tools import execute_soundcloud_get_profile
             result = await execute_soundcloud_get_profile(**arguments)
+            return [TextContent(type="text", text=json.dumps(result, indent=2, ensure_ascii=False))]
+
+        elif name == "beatport_search":
+            from app.mcp.tools.beatport_tools import execute_beatport_search
+            result = await execute_beatport_search(**arguments)
+            return [TextContent(type="text", text=json.dumps(result, indent=2, ensure_ascii=False))]
+
+        elif name == "beatport_get_label_releases":
+            from app.mcp.tools.beatport_tools import execute_beatport_get_label_releases
+            result = await execute_beatport_get_label_releases(**arguments)
             return [TextContent(type="text", text=json.dumps(result, indent=2, ensure_ascii=False))]
 
         else:
