@@ -15,6 +15,7 @@ from app.mcp.tools import (
     soundcloud_get_profile_tool,
     beatport_search_tool,
     beatport_get_label_releases_tool,
+    bandcamp_search_tool,
 )
 
 logger = logging.getLogger(__name__)
@@ -30,6 +31,7 @@ def create_mcp_server() -> Server:
             soundcloud_get_profile_tool,
             beatport_search_tool,
             beatport_get_label_releases_tool,
+            bandcamp_search_tool,
         ]
 
     @server.call_tool()
@@ -52,6 +54,11 @@ def create_mcp_server() -> Server:
         elif name == "beatport_get_label_releases":
             from app.mcp.tools.beatport_tools import execute_beatport_get_label_releases
             result = await execute_beatport_get_label_releases(**arguments)
+            return [TextContent(type="text", text=json.dumps(result, indent=2, ensure_ascii=False))]
+
+        elif name == "bandcamp_search":
+            from app.mcp.tools.bandcamp_tools import execute_bandcamp_search
+            result = await execute_bandcamp_search(**arguments)
             return [TextContent(type="text", text=json.dumps(result, indent=2, ensure_ascii=False))]
 
         else:

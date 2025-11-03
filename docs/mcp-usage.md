@@ -233,6 +233,37 @@ Récupère les releases d'un label Beatport avec les statistiques de genres (fac
 Peux-tu récupérer les releases du label Drumzone Records (slug: drumzone-records, id: 22038) depuis le 1er janvier 2024 ?
 ```
 
+### 5. bandcamp_search
+
+Recherche des artistes, labels sur Bandcamp par nom ou mot-clé.
+
+**Paramètres** :
+- `query` (string, requis) : Nom de l'artiste, label ou mot-clé de recherche
+- `page` (integer, optionnel) : Numéro de page pour la pagination (défaut: 1)
+- `entity_type` (string, optionnel) : Type de recherche - "bands" pour artistes/labels ou "tracks" pour pistes (défaut: "bands")
+
+**Retour** :
+```json
+{
+  "bands": [
+    {
+      "id": 123456,
+      "name": "Label Name",
+      "url": "https://labelname.bandcamp.com",
+      "avatar_url": "https://f4.bcbits.com/img/...",
+      "location": "Berlin, Germany",
+      "genre": "Electronic"
+    }
+  ],
+  "tracks": []
+}
+```
+
+**Exemple d'utilisation** :
+```
+Peux-tu chercher le label "Nous'klaer Audio" sur Bandcamp ?
+```
+
 ## 🧪 Tests
 
 ### Tester le serveur MCP localement
@@ -301,10 +332,11 @@ docker logs techno-scraper-mcp
 - [x] Integration avec n8n MCP Client
 - [x] Documentation
 
-### Phase 3 : Bandcamp (À venir)
-- [ ] Tool `bandcamp_search`
-- [ ] Tests d'intégration MCP
-- [ ] Note: API REST déjà disponible
+### Phase 3 : Bandcamp ✅
+- [x] Tool `bandcamp_search`
+- [x] Integration avec n8n MCP Client
+- [x] Documentation
+- [ ] Tests d'intégration MCP (optionnel)
 
 ### Phase 4 : Nettoyage
 - [ ] Suppression de l'API REST (routers/)
