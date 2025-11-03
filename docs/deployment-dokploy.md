@@ -151,7 +151,7 @@ Créer `n8n-mcp-config.json` :
         "techno-scraper-mcp",
         "python",
         "-m",
-        "app.mcp.server"
+        "app.mcp"
       ]
     }
   }
@@ -167,7 +167,7 @@ Si n8n supporte MCP nativement et partage le réseau `dokploy-network` :
   "mcpServers": {
     "techno-scraper": {
       "command": "python",
-      "args": ["-m", "app.mcp.server"],
+      "args": ["-m", "app.mcp"],
       "network": "techno-scraper-mcp"
     }
   }
@@ -198,7 +198,7 @@ Si n8n supporte MCP nativement et partage le réseau `dokploy-network` :
 ```bash
 # Test du serveur MCP via stdin
 echo '{"jsonrpc":"2.0","method":"tools/list","id":1}' | \
-  docker exec -i techno-scraper-mcp python -m app.mcp.server
+  docker exec -i techno-scraper-mcp python -m app.mcp
 
 # Réponse attendue : Liste des tools disponibles
 ```
@@ -270,7 +270,7 @@ docker network inspect dokploy-network
 
 ```bash
 # Tester manuellement
-docker exec techno-scraper-mcp pgrep -f "app.mcp.server"
+docker exec techno-scraper-mcp pgrep -f "app.mcp"
 
 # Si aucun processus, vérifier les logs
 docker logs techno-scraper-mcp

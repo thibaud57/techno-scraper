@@ -21,7 +21,7 @@ techno-scraper/
 │   ├── main.py                  # [TODO Phase 4] Point d'entrée FastAPI (à supprimer)
 │   ├── mcp/                     # [NOUVEAU] Serveur MCP
 │   │   ├── __init__.py
-│   │   ├── __main__.py          # Point d'entrée: python -m app.mcp.server
+│   │   ├── __main__.py          # Point d'entrée: python -m app.mcp
 │   │   ├── server.py            # Serveur MCP principal
 │   │   └── tools/               # Définition des MCP tools
 │   │       ├── __init__.py
@@ -345,7 +345,7 @@ Les clients MCP (Claude Desktop, n8n) configurent le serveur via JSON :
   "mcpServers": {
     "techno-scraper": {
       "command": "python",
-      "args": ["-m", "app.mcp.server"],
+      "args": ["-m", "app.mcp"],
       "cwd": "/path/to/techno-scraper"
     }
   }

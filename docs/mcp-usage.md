@@ -44,7 +44,7 @@ SOUNDCLOUD_CLIENT_SECRET=your-soundcloud-client-secret
       "command": "python",
       "args": [
         "-m",
-        "app.mcp.server"
+        "app.mcp"
       ],
       "cwd": "/path/to/techno-scraper",
       "env": {
@@ -141,7 +141,7 @@ Peux-tu récupérer le profil SoundCloud de l'utilisateur avec l'ID 12345678 ?
 
 ```bash
 # Lancer le serveur MCP en mode standalone
-python -m app.mcp.server
+python -m app.mcp
 ```
 
 Le serveur attend des entrées JSON-RPC sur stdin et retourne les résultats sur stdout.
@@ -174,10 +174,10 @@ logging.basicConfig(
 
 ```bash
 # Le serveur doit démarrer sans erreur
-python -m app.mcp.server
+python -m app.mcp
 
 # Dans un autre terminal, vous pouvez envoyer une requête JSON-RPC
-echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' | python -m app.mcp.server
+echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' | python -m app.mcp
 ```
 
 ## 📋 Roadmap

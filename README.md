@@ -21,7 +21,7 @@ Le projet supporte maintenant le **Model Context Protocol (MCP)** d'Anthropic po
 **Quick Start MCP** :
 ```bash
 # Lancer le serveur MCP
-python -m app.mcp.server
+python -m app.mcp
 ```
 
 📖 **Documentation complète** : [MCP Usage](./docs/mcp-usage.md) | [n8n MCP Setup](./docs/n8n-mcp-setup.md)
@@ -55,7 +55,7 @@ scripts/setup_venv.bat  # Windows
 ./scripts/setup_venv.sh # Linux/macOS
 python app/main.py      # API REST
 # OU
-python -m app.mcp.server # Serveur MCP
+python -m app.mcp # Serveur MCP
 ```
 
 **Accès** : [http://localhost:8000](http://localhost:8000)
