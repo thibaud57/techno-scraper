@@ -36,7 +36,7 @@ Le projet techno-scraper évolue d'une API REST FastAPI vers un serveur MCP (Mod
     - Communication JSON-RPC via stdio (pas HTTP)
     - Configuration pour Claude Desktop et n8n
     - Tests d'intégration MCP dans `tests/mcp/`
-    - Documentation complète : `MCP_USAGE.md`, `N8N_MCP_SETUP.md`
+    - Documentation complète : `docs/mcp-usage.md`, `docs/n8n-mcp-setup.md`
     - Mise à jour de `requirements.txt` : ajout de `mcp>=1.0.0`, upgrade `httpx>=0.27.1`
     - TODOs ajoutés dans le code legacy (routers, main.py) pour suppression Phase 4
     - Variables d'environnement lues depuis `.env` (pas de duplication dans config MCP)
@@ -267,14 +267,14 @@ Architecture de test en couches avec mocks appropriés selon le niveau. Voir [te
      - `beatport_search` : Recherche d'artistes/labels/releases/tracks
      - `beatport_get_releases` : Récupération de releases avec facets
    - Ajouter tests dans `tests/mcp/test_beatport_mcp_tools.py`
-   - Mettre à jour `MCP_USAGE.md`
+   - Mettre à jour `docs/mcp-usage.md`
 
 3. **Phase 3 - Bandcamp MCP** 📅
    - Créer `app/mcp/tools/bandcamp_tools.py`
    - Implémenter le tool :
      - `bandcamp_search` : Recherche d'artistes et labels
    - Ajouter tests dans `tests/mcp/test_bandcamp_mcp_tools.py`
-   - Mettre à jour `MCP_USAGE.md`
+   - Mettre à jour `docs/mcp-usage.md`
 
 4. **Phase 4 - Suppression REST API** 📅 (Après validation Phase 3)
    - Supprimer `app/main.py`
@@ -314,8 +314,8 @@ Architecture de test en couches avec mocks appropriés selon le niveau. Voir [te
 ### Documentation projet
 
 - [Architecture détaillée](architecture.md) - Documentation technique complète avec section MCP
-- [MCP_USAGE.md](../MCP_USAGE.md) - Guide d'utilisation du serveur MCP
-- [N8N_MCP_SETUP.md](../N8N_MCP_SETUP.md) - Configuration MCP pour n8n
+- [MCP Usage Guide](./mcp-usage.md) - Guide d'utilisation du serveur MCP
+- [n8n MCP Setup](./n8n-mcp-setup.md) - Configuration MCP pour n8n
 - [README.md](../README.md) - Vue d'ensemble et quick start
 - [tests/README.md](../tests/README.md) - Guide des tests
 

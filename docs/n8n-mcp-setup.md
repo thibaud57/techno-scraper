@@ -166,7 +166,7 @@ services:
       - N8N_BASIC_AUTH_PASSWORD=your-password
     volumes:
       - n8n_data:/home/node/.n8n
-      - ./mcp_config.json:/home/node/.n8n/mcp_config.json
+      - ./n8n-mcp-config.json:/home/node/.n8n/mcp_config.json  # Créer ce fichier selon la section Configuration
       - ./techno-scraper:/app/techno-scraper
     depends_on:
       - techno-scraper-mcp
@@ -198,4 +198,4 @@ docker-compose up -d
 
 - [Documentation n8n](https://docs.n8n.io/)
 - [MCP Protocol Documentation](https://modelcontextprotocol.io/)
-- [techno-scraper MCP_USAGE.md](./MCP_USAGE.md)
+- [techno-scraper MCP Usage Guide](./mcp-usage.md)

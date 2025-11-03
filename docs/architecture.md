@@ -108,10 +108,6 @@ techno-scraper/
 ├── requirements.txt             # Dépendances Python principales
 ├── requirements-test.txt        # Dépendances pour les tests
 ├── pytest.ini                   # Configuration pytest
-├── mcp_config.json              # Configuration MCP générique
-├── claude_desktop_config.json   # Configuration pour Claude Desktop
-├── MCP_USAGE.md                 # Documentation d'utilisation MCP
-├── N8N_MCP_SETUP.md             # Guide d'intégration n8n avec MCP
 └── README.md                    # Documentation du projet
 ```
 
@@ -375,5 +371,8 @@ Les variables d'environnement (SOUNDCLOUD_CLIENT_ID, etc.) sont lues depuis le `
 
 ## Informations complémentaires
 
-- **Journal de développement** : [DEVELOPMENT.md](DEVELOPMENT.md) - Modifications récentes et prochaines étapes
+- **Journal de développement** : [development.md](development.md) - Modifications récentes et prochaines étapes
 - **Guide d'utilisation** : [../README.md](../README.md) - Installation et utilisation de base
+- **MCP Usage** : [mcp-usage.md](mcp-usage.md) - Guide d'utilisation du serveur MCP
+- **n8n MCP Setup** : [n8n-mcp-setup.md](n8n-mcp-setup.md) - Configuration MCP pour n8n
+- **Déploiement Dokploy** : [deployment-dokploy.md](deployment-dokploy.md) - Guide de déploiement sur Dokploy

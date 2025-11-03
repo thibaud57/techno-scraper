@@ -110,6 +110,18 @@ class TestBandcampSearchScraper:
 
 ## Python Development Standards
 
+### Code Formatting and Linting
+```bash
+# Format code with black (run before commits)
+black .
+
+# Sort imports with isort
+isort .
+
+# Lint with ruff (check for errors and style issues)
+ruff check .
+```
+
 ### Code Quality Rules
 - **NO COMMENTS unless explicitly requested** - code should be self-documenting
 - **Use type hints** for all function parameters and return types
@@ -134,6 +146,11 @@ class TestBandcampSearchScraper:
 - **Update __init__.py exports** when adding new modules
 - **Follow directory structure**: `app/[layer]/[platform]/` pattern
 - **Keep imports clean** - use absolute imports from app root
+
+### Security Standards
+- **NEVER commit secrets** - use environment variables in `.env` file (must be in `.gitignore`)
+- **Validate all external input** - use Pydantic models for validation
+- **Keep dependencies updated** - regularly check for security vulnerabilities
 
 ## Important Configuration
 
@@ -165,6 +182,16 @@ SOUNDCLOUD_CLIENT_SECRET=your-client-secret
 4. Add comprehensive tests (unit + integration)
 5. Update `app/main.py` to include new router
 
+### Git Commit Messages
+Follow [Conventional Commits](https://www.conventionalcommits.org/) format:
+- `feat: add Beatport search endpoint`
+- `fix: handle rate limiting in Soundcloud scraper`
+- `docs: update API documentation for releases`
+- `test: add integration tests for MCP tools`
+- `refactor: simplify error handling in base scraper`
+
+Make atomic commits - each commit should represent a single logical change.
+
 ### Testing Strategy
 - Unit tests mock at appropriate levels (services for scrapers, HTTP for services)
 - Integration tests mock at scraper level
@@ -183,12 +210,22 @@ SOUNDCLOUD_CLIENT_SECRET=your-client-secret
 For detailed information, refer to these files:
 
 - **Architecture**: See `docs/architecture.md` for complete system architecture, diagrams, and component details
-- **Development Context**: See `docs/DEVELOPMENT.md` for project history, current state, implemented features, and technical notes
+- **Development Context**: See `docs/development.md` for project history, current state, implemented features, and technical notes
 - **Project Overview**: See `README.md` for setup instructions and API documentation
 
-## Common Lint/Test Commands
+## Pre-Commit Checklist
 
 ```bash
-# No specific lint command defined - check if tests pass before commits
-pytest  # This project relies on tests for code quality validation
+# 1. Format code
+black .
+isort .
+
+# 2. Lint code
+ruff check .
+
+# 3. Run tests
+pytest
+
+# 4. Check coverage (optional)
+pytest --cov=app tests/
 ```
