@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "techno-scraper": {
+      "command": "python",
+      "args": [
+        "-m",
+        "app.mcp.server"
+      ],
+      "cwd": "/path/to/techno-scraper",
+      "env": {
+        "SOUNDCLOUD_CLIENT_ID": "your-soundcloud-client-id",
+        "SOUNDCLOUD_CLIENT_SECRET": "your-soundcloud-client-secret"
+      }
+    }
+  }
+}

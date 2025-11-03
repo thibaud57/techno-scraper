@@ -4,7 +4,27 @@ API FastAPI pour scraper des données de sites musicaux (Soundcloud, Beatport, B
 
 ## 📋 Description
 
-Techno-scraper permet de récupérer automatiquement des données depuis différentes plateformes musicales via une API REST simple. Conçu pour l'intégration avec des outils d'automatisation comme n8n.
+Techno-scraper permet de récupérer automatiquement des données depuis différentes plateformes musicales. Le projet propose deux modes d'utilisation :
+- **API REST** : Interface FastAPI classique (en cours de migration)
+- **Serveur MCP** : Intégration directe avec des agents IA (Claude Desktop, n8n)
+
+## 🎯 Mode MCP (Nouveau !)
+
+Le projet supporte maintenant le **Model Context Protocol (MCP)** d'Anthropic pour une intégration native avec les agents IA.
+
+**Avantages MCP** :
+- Intégration directe dans Claude Desktop
+- Pas besoin de gérer des endpoints HTTP
+- Communication sécurisée via stdio
+- Typage fort des paramètres
+
+**Quick Start MCP** :
+```bash
+# Lancer le serveur MCP
+python -m app.mcp.server
+```
+
+📖 **Documentation complète** : [MCP_USAGE.md](./MCP_USAGE.md) | [N8N_MCP_SETUP.md](./N8N_MCP_SETUP.md)
 
 ## 🚀 Fonctionnalités
 
