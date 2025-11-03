@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Service API REST (Legacy - à supprimer en Phase 4)
   techno-scraper-api:
