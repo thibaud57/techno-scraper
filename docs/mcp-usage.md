@@ -151,6 +151,119 @@ Récupère les informations détaillées d'un profil SoundCloud spécifique par 
 Peux-tu récupérer le profil SoundCloud de l'utilisateur avec l'ID 12345678 ?
 ```
 
+### 3. beatport_search
+
+Recherche des labels, artistes, tracks ou releases sur Beatport par nom ou mot-clé.
+
+**Paramètres** :
+- `query` (string, requis) : Nom du label, artiste ou mot-clé de recherche
+- `page` (integer, optionnel) : Numéro de page pour la pagination (défaut: 1)
+- `limit` (integer, optionnel) : Nombre de résultats par page - 10, 25 ou 50 (défaut: 10)
+- `entity_type` (string, optionnel) : Filtre par type - "artist", "label", "track", "release", ou null pour tous (défaut: null)
+
+**Retour** :
+```json
+{
+  "total_results": 25,
+  "page": 1,
+  "limit": 10,
+  "artists": [
+    {
+      "id": 12345,
+      "name": "Artist Name",
+      "url": "https://www.beatport.com/artist/artist-name/12345",
+      "avatar_url": "https://geo-media.beatport.com/image.jpg"
+    }
+  ],
+  "labels": [
+    {
+      "id": 22038,
+      "name": "Drumzone Records",
+      "url": "https://www.beatport.com/label/drumzone-records/22038",
+      "avatar_url": "https://geo-media.beatport.com/image.jpg"
+    }
+  ],
+  "tracks": [],
+  "releases": []
+}
+```
+
+**Exemple d'utilisation** :
+```
+Peux-tu chercher le label "Afterlife" sur Beatport ?
+```
+
+### 4. beatport_get_label_releases
+
+Récupère les releases d'un label Beatport avec les statistiques de genres (facets).
+
+**Paramètres** :
+- `entity_slug` (string, requis) : Slug du label (ex: "drumzone-records")
+- `entity_id` (string, requis) : ID du label (ex: "22038")
+- `page` (integer, optionnel) : Numéro de page (défaut: 1)
+- `limit` (integer, optionnel) : Nombre de résultats par page - 10, 25 ou 50 (défaut: 25)
+- `start_date` (string, optionnel) : Date de début au format YYYY-MM-DD (ex: "2024-01-15")
+
+**Retour** :
+```json
+{
+  "releases": [
+    {
+      "id": 456789,
+      "name": "Release Name",
+      "url": "https://www.beatport.com/release/...",
+      "artists": [{"id": 123, "name": "Artist Name"}],
+      "label": {"id": 22038, "name": "Drumzone Records"},
+      "publish_date": "2024-06-15"
+    }
+  ],
+  "facets": {
+    "fields": {
+      "genre": [
+        {"name": "Techno (Peak Time / Driving)", "count": 32},
+        {"name": "Deep House", "count": 5}
+      ]
+    }
+  }
+}
+```
+
+**Exemple d'utilisation** :
+```
+Peux-tu récupérer les releases du label Drumzone Records (slug: drumzone-records, id: 22038) depuis le 1er janvier 2024 ?
+```
+
+### 5. bandcamp_search
+
+Recherche des artistes, labels sur Bandcamp par nom ou mot-clé.
+
+**Paramètres** :
+- `query` (string, requis) : Nom de l'artiste, label ou mot-clé de recherche
+- `page` (integer, optionnel) : Numéro de page pour la pagination (défaut: 1)
+- `entity_type` (string, optionnel) : Type de recherche - "bands" pour artistes/labels ou "tracks" pour pistes (défaut: "bands")
+
+**Retour** :
+```json
+{
+  "bands": [
+    {
+      "id": 123456,
+      "name": "Label Name",
+      "url": "https://labelname.bandcamp.com",
+      "avatar_url": "https://f4.bcbits.com/img/...",
+      "location": "Berlin, Germany",
+      "genre": "Electronic"
+    }
+  ],
+  "tracks": []
+}
+```
+
+**Exemple d'utilisation** :
+```
+Peux-tu chercher le label "Nous'klaer Audio" sur Bandcamp ?
+```
+
 ## 🧪 Tests
 
 ### Tester le serveur MCP localement
@@ -213,14 +326,17 @@ docker logs techno-scraper-mcp
 - [x] Tests d'intégration
 - [x] Documentation
 
-### Phase 2 : Beatport (À venir)
-- [ ] Tool `beatport_search`
-- [ ] Tool `beatport_get_releases`
-- [ ] Tests d'intégration
+### Phase 2 : Beatport ✅
+- [x] Tool `beatport_search`
+- [x] Tool `beatport_get_label_releases`
+- [x] Integration avec n8n MCP Client
+- [x] Documentation
 
-### Phase 3 : Bandcamp (À venir)
-- [ ] Tool `bandcamp_search`
-- [ ] Tests d'intégration
+### Phase 3 : Bandcamp ✅
+- [x] Tool `bandcamp_search`
+- [x] Integration avec n8n MCP Client
+- [x] Documentation
+- [ ] Tests d'intégration MCP (optionnel)
 
 ### Phase 4 : Nettoyage
 - [ ] Suppression de l'API REST (routers/)
