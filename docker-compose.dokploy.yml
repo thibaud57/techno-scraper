@@ -32,13 +32,14 @@ services:
     environment:
       - SOUNDCLOUD_CLIENT_ID=${SOUNDCLOUD_CLIENT_ID}
       - SOUNDCLOUD_CLIENT_SECRET=${SOUNDCLOUD_CLIENT_SECRET}
-      - MCP_PORT=8080
+      - MCP_PORT=${MCP_PORT:-8080}
     networks:
       - dokploy-network
-    # Port 8080 accessible uniquement depuis le réseau Docker (pas d'exposition externe)
-    # n8n peut se connecter via http://techno-scraper-mcp:8080/mcp
+    # Port accessible uniquement depuis le réseau Docker (pas d'exposition externe)
+    # n8n MCP Server Trigger se connecte via http://techno-scraper-mcp:8080/sse
+    # n8n expose ensuite publiquement via https://n8n.empiricmind.fr/mcp/techno-scraper-mcp/sse
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/mcp"]
+      test: ["CMD", "curl", "-f", "http://localhost:${MCP_PORT:-8080}/sse"]
       interval: 30s
       timeout: 10s
       retries: 3

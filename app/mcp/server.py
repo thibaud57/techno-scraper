@@ -4,10 +4,11 @@ import os
 from typing import Any
 
 from mcp.server import Server
-from mcp.server.sse import sse_server
+from mcp.server.sse import SseServerTransport
 from mcp.types import TextContent
 from starlette.applications import Starlette
-from starlette.routing import Route
+from starlette.responses import Response
+from starlette.routing import Mount, Route
 
 from app.mcp.tools import (
     soundcloud_search_profiles_tool,
@@ -46,19 +47,26 @@ def create_mcp_server() -> Server:
 
 
 mcp_server = create_mcp_server()
+sse_transport = SseServerTransport("/messages/")
 
 
 async def handle_sse(request):
-    async with sse_server() as (read_stream, write_stream):
+    async with sse_transport.connect_sse(
+        request.scope,
+        request.receive,
+        request._send,
+    ) as (read_stream, write_stream):
         await mcp_server.run(
             read_stream,
             write_stream,
             mcp_server.create_initialization_options(),
         )
+    return Response()
 
 
 routes = [
-    Route("/mcp", endpoint=handle_sse),
+    Route("/sse", endpoint=handle_sse, methods=["GET"]),
+    Mount("/messages/", app=sse_transport.handle_post_message),
 ]
 
 app = Starlette(routes=routes)
@@ -73,6 +81,6 @@ if __name__ == "__main__":
     )
 
     port = int(os.getenv("MCP_PORT", "8080"))
-    logger.info(f"Starting MCP server on http://0.0.0.0:{port}/mcp")
+    logger.info(f"Starting MCP server on http://0.0.0.0:{port}/sse")
 
     uvicorn.run(app, host="0.0.0.0", port=port)
