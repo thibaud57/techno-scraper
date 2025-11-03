@@ -20,7 +20,7 @@ Le projet techno-scraper évolue d'une API REST FastAPI vers un serveur MCP (Mod
 ### Infrastructure technique
 
 - Architecture en couches avec scrapers modulaires (partagée entre REST et MCP)
-- **Serveur MCP** avec communication stdio JSON-RPC
+- **Serveur MCP** avec communication HTTP/SSE (Server-Sent Events)
 - Authentification par clé API (REST uniquement)
 - Tests unitaires et d'intégration complets (REST + MCP)
 - CI/CD avec GitHub Actions
@@ -33,10 +33,11 @@ Le projet techno-scraper évolue d'une API REST FastAPI vers un serveur MCP (Mod
       - `soundcloud_search_profiles` : Recherche d'artistes avec pagination
       - `soundcloud_get_profile` : Récupération de profil par ID
     - Architecture orientée tools (vs routes REST)
-    - Communication JSON-RPC via stdio (pas HTTP)
-    - Configuration pour Claude Desktop et n8n
+    - Communication HTTP/SSE (Server-Sent Events) sur port 8080
+    - Configuration pour n8n MCP Server Trigger
     - Tests d'intégration MCP dans `tests/mcp/`
-    - Documentation complète : `docs/mcp-usage.md`, `docs/n8n-mcp-setup.md`
+    - Documentation complète : `docs/mcp-usage.md`
+    - Déploiement Docker avec Dockerfile.mcp
     - Mise à jour de `requirements.txt` : ajout de `mcp>=1.0.0`, upgrade `httpx>=0.27.1`
     - TODOs ajoutés dans le code legacy (routers, main.py) pour suppression Phase 4
     - Variables d'environnement lues depuis `.env` (pas de duplication dans config MCP)

@@ -70,17 +70,3 @@ routes = [
 ]
 
 app = Starlette(routes=routes)
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    )
-
-    port = int(os.getenv("MCP_PORT", "8080"))
-    logger.info(f"Starting MCP server on http://0.0.0.0:{port}/sse")
-
-    uvicorn.run(app, host="0.0.0.0", port=port)

@@ -13,18 +13,18 @@ Techno-scraper permet de récupérer automatiquement des données depuis différ
 Le projet supporte maintenant le **Model Context Protocol (MCP)** d'Anthropic pour une intégration native avec les agents IA.
 
 **Avantages MCP** :
-- Intégration directe dans Claude Desktop
-- Pas besoin de gérer des endpoints HTTP
-- Communication sécurisée via stdio
+- Intégration directe avec n8n et autres agents IA
+- Communication via HTTP/SSE (Server-Sent Events)
 - Typage fort des paramètres
+- Déploiement production-ready
 
 **Quick Start MCP** :
 ```bash
-# Lancer le serveur MCP
+# Lancer le serveur MCP (écoute sur http://localhost:8080/sse)
 python -m app.mcp
 ```
 
-📖 **Documentation complète** : [MCP Usage](./docs/mcp-usage.md) | [n8n MCP Setup](./docs/n8n-mcp-setup.md)
+📖 **Documentation complète** : [MCP Usage](./docs/mcp-usage.md)
 
 ## 🚀 Fonctionnalités
 
