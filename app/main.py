@@ -10,6 +10,9 @@ from app.core.errors import ScraperException
 from app.models import ErrorResponse
 from app.routers import soundcloud_router, beatport_router, bandcamp_router
 
+# TODO: [MCP Migration - Phase 4] Ce fichier sera supprimé après migration complète vers MCP
+# Actuellement maintenu pour compatibilité REST API pendant la phase de transition
+
 # Configuration du logger
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL),

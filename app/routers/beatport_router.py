@@ -11,6 +11,9 @@ from app.models import (BeatportSearchResult, ErrorResponse,
 from app.models.beatport_models import BeatportEntityType, BeatportReleaseEntityType, BeatportReleasesResult
 from app.scrapers import BeatportReleasesScraper, BeatportSearchScraper
 
+# TODO: [MCP Migration - Phase 2] Ce router sera supprimé après implémentation des MCP tools Beatport
+# À remplacer par app/mcp/tools/beatport_tools.py
+
 # Création du router
 router = APIRouter(
     prefix="/beatport",

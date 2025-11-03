@@ -2,25 +2,48 @@
 
 Ce document résume l'état actuel du projet, les fonctionnalités implémentées, et les prochaines étapes prévues.
 
-## État actuel du projet (29/07/2025)
+## État actuel du projet (03/11/2025)
 
-Le projet techno-scraper est une API FastAPI conçue pour scraper des données de différents sites liés à la musique techno (Soundcloud, Beatport, Bandcamp, ...). 
-L'API est destinée à être utilisée par n8n pour automatiser des workflows de récupération de données.
+Le projet techno-scraper évolue d'une API REST FastAPI vers un serveur MCP (Model Context Protocol) pour intégration native avec les agents IA.
+
+### Deux modes d'utilisation
+
+- **[Nouveau] Serveur MCP** : Intégration directe avec Claude Desktop, n8n MCP
+- **[Legacy] API REST FastAPI** : Maintenue temporairement, sera supprimée en Phase 4
 
 ### Plateformes supportées
 
-- **Soundcloud** : Recherche de profils, données d'artistes, réseaux sociaux
-- **Beatport** : Recherche, releases avec facets de genres
-- **Bandcamp** : Recherche d'artistes et labels
+- **Soundcloud** : Recherche de profils, données d'artistes, réseaux sociaux (REST + MCP ✅)
+- **Beatport** : Recherche, releases avec facets de genres (REST uniquement, MCP Phase 2)
+- **Bandcamp** : Recherche d'artistes et labels (REST uniquement, MCP Phase 3)
 
 ### Infrastructure technique
 
-- Architecture en couches avec scrapers modulaires
-- Authentification par clé API
-- Tests unitaires et d'intégration complets
+- Architecture en couches avec scrapers modulaires (partagée entre REST et MCP)
+- **Serveur MCP** avec communication stdio JSON-RPC
+- Authentification par clé API (REST uniquement)
+- Tests unitaires et d'intégration complets (REST + MCP)
 - CI/CD avec GitHub Actions
 
-### Modifications récentes (29/07/2025) Bandcamp
+### Modifications récentes (03/11/2025) Migration MCP
+
+-   **Implémentation du serveur MCP (Phase 1 - SoundCloud)**
+    - Nouveau module `app/mcp/` avec serveur MCP complet
+    - Deux tools SoundCloud fonctionnels :
+      - `soundcloud_search_profiles` : Recherche d'artistes avec pagination
+      - `soundcloud_get_profile` : Récupération de profil par ID
+    - Architecture orientée tools (vs routes REST)
+    - Communication JSON-RPC via stdio (pas HTTP)
+    - Configuration pour Claude Desktop et n8n
+    - Tests d'intégration MCP dans `tests/mcp/`
+    - Documentation complète : `MCP_USAGE.md`, `N8N_MCP_SETUP.md`
+    - Mise à jour de `requirements.txt` : ajout de `mcp>=1.0.0`, upgrade `httpx>=0.27.1`
+    - TODOs ajoutés dans le code legacy (routers, main.py) pour suppression Phase 4
+    - Variables d'environnement lues depuis `.env` (pas de duplication dans config MCP)
+    - Coexistence REST + MCP : même code métier (scrapers/services) partagé
+    - Aucun breaking change : API REST toujours fonctionnelle
+
+### Modifications précédentes (29/07/2025) Bandcamp
 
 -   **Implémentation du scraper Bandcamp**
     - Nouveau scraper de recherche avec support des artistes et labels (`BandcampSearchScraper`)
@@ -228,33 +251,58 @@ Architecture de test en couches avec mocks appropriés selon le niveau. Voir [te
 
 ## Prochaines étapes
 
-### Priorité haute
+### Priorité haute - Migration MCP
 
-1. **Implémentation des scrapers restants** :
+**Plan de migration en 4 phases** :
 
-    - Discogs
-    - Songstats
+1. **Phase 1 - SoundCloud MCP** ✅ (Terminé 03/11/2025)
+   - Serveur MCP implémenté
+   - Tools `soundcloud_search_profiles` et `soundcloud_get_profile`
+   - Tests d'intégration MCP
+   - Documentation complète
 
-2. **Amélioration de la gestion des erreurs** :
+2. **Phase 2 - Beatport MCP** 🔄 (Prochaine étape)
+   - Créer `app/mcp/tools/beatport_tools.py`
+   - Implémenter les tools :
+     - `beatport_search` : Recherche d'artistes/labels/releases/tracks
+     - `beatport_get_releases` : Récupération de releases avec facets
+   - Ajouter tests dans `tests/mcp/test_beatport_mcp_tools.py`
+   - Mettre à jour `MCP_USAGE.md`
 
-    - Logging plus détaillé
-    - Mécanismes de retry plus sophistiqués ?
+3. **Phase 3 - Bandcamp MCP** 📅
+   - Créer `app/mcp/tools/bandcamp_tools.py`
+   - Implémenter le tool :
+     - `bandcamp_search` : Recherche d'artistes et labels
+   - Ajouter tests dans `tests/mcp/test_bandcamp_mcp_tools.py`
+   - Mettre à jour `MCP_USAGE.md`
+
+4. **Phase 4 - Suppression REST API** 📅 (Après validation Phase 3)
+   - Supprimer `app/main.py`
+   - Supprimer `app/routers/` (soundcloud_router, beatport_router, bandcamp_router)
+   - Supprimer `tests/integration/test_*_router.py`
+   - Nettoyer `requirements.txt` (supprimer FastAPI, uvicorn si inutiles)
+   - Mettre à jour `README.md` et `architecture.md`
+   - Migration complète vers MCP uniquement
 
 ### Priorité moyenne
 
-1. **Documentation** :
+1. **Implémentation de nouveaux scrapers** :
+   - Discogs (avec MCP tools)
+   - Songstats (avec MCP tools)
 
-    - Documentation plus détaillée des endpoints API
-    - Exemples d'utilisation avec n8n
+2. **Amélioration de la gestion des erreurs** :
+   - Logging plus détaillé
+   - Mécanismes de retry plus sophistiqués
 
-2. **Monitoring** :
-    - Ajout de métriques (temps de réponse, taux d'erreur)
-    - Intégration avec un système de monitoring
+3. **Monitoring** :
+   - Ajout de métriques (temps de réponse, taux d'erreur)
+   - Intégration avec un système de monitoring
 
 ### Priorité basse
 
 1. **Optimisations** :
-    - Parallélisation des requêtes plus poussé ?
+   - Parallélisation des requêtes plus poussée
+   - Cache pour les requêtes fréquentes
 
 ## Workflow de développement
 
@@ -263,6 +311,17 @@ Architecture de test en couches avec mocks appropriés selon le niveau. Voir [te
 
 ## Ressources
 
-- [Architecture détaillée](architecture.md) - Documentation technique complète
+### Documentation projet
+
+- [Architecture détaillée](architecture.md) - Documentation technique complète avec section MCP
+- [MCP_USAGE.md](../MCP_USAGE.md) - Guide d'utilisation du serveur MCP
+- [N8N_MCP_SETUP.md](../N8N_MCP_SETUP.md) - Configuration MCP pour n8n
+- [README.md](../README.md) - Vue d'ensemble et quick start
+- [tests/README.md](../tests/README.md) - Guide des tests
+
+### Documentation externe
+
+- [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) - Documentation officielle MCP
+- [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk) - SDK Python pour MCP
 - [Documentation API SoundCloud](https://developers.soundcloud.com/docs/api/guide)
 - [GitHub Actions](.github/workflows/) - Workflows CI/CD
