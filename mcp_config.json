@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "techno-scraper": {
+      "command": "python",
+      "args": ["-m", "app.mcp.server"]
+    }
+  }
+}
+
+// NOTE: Les variables d'environnement sont lues depuis le fichier .env du projet.
+// Le serveur MCP démarre dans le contexte du shell et hérite des variables d'environnement.
+//
+// Configuration alternative avec variables explicites (si .env non disponible) :
+// "env": {
+//   "SOUNDCLOUD_CLIENT_ID": "${SOUNDCLOUD_CLIENT_ID}",
+//   "SOUNDCLOUD_CLIENT_SECRET": "${SOUNDCLOUD_CLIENT_SECRET}"
+// }

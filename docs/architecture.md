@@ -1,15 +1,16 @@
 # Architecture du projet techno-scraper
 
-Ce document décrit l'architecture du projet techno-scraper, une API FastAPI pour scraper des données de différents sites liés à la musique techno.
+Ce document décrit l'architecture du projet techno-scraper, un système de scraping de données musicales avec deux interfaces : REST API (legacy) et serveur MCP (moderne).
 
 ## Objectif du projet
 
 Le projet techno-scraper vise à :
 
 -   Scraper des données de sites musicaux (Soundcloud, Beatport, Bandcamp, ...)
--   Exposer ces données via une API FastAPI
+-   **[Nouveau]** Exposer ces données via un serveur MCP (Model Context Protocol) pour intégration native avec les agents IA
+-   **[Legacy]** Exposer ces données via une API REST FastAPI (en cours de migration)
 -   Fonctionner en local et en production via Docker
--   Être utilisé par n8n sur un VPS
+-   Être utilisé par n8n et Claude Desktop sur un VPS
 
 ## Structure du projet
 
@@ -17,7 +18,16 @@ Le projet techno-scraper vise à :
 techno-scraper/
 ├── app/
 │   ├── __init__.py
-│   ├── main.py                  # Point d'entrée de l'application FastAPI
+│   ├── main.py                  # [TODO Phase 4] Point d'entrée FastAPI (à supprimer)
+│   ├── mcp/                     # [NOUVEAU] Serveur MCP
+│   │   ├── __init__.py
+│   │   ├── __main__.py          # Point d'entrée: python -m app.mcp.server
+│   │   ├── server.py            # Serveur MCP principal
+│   │   └── tools/               # Définition des MCP tools
+│   │       ├── __init__.py
+│   │       ├── soundcloud_tools.py  # Tools SoundCloud (search, get_profile)
+│   │       ├── beatport_tools.py    # [TODO Phase 2] Tools Beatport
+│   │       └── bandcamp_tools.py    # [TODO Phase 3] Tools Bandcamp
 │   ├── core/                    # Fonctionnalités centrales
 │   │   ├── __init__.py
 │   │   ├── config.py            # Configuration de l'application
@@ -26,7 +36,7 @@ techno-scraper/
 │   ├── models/                  # Modèles Pydantic pour la validation des données
 │   │   ├── __init__.py
 │   │   └── schemas.py           # Schémas de données communs
-│   ├── routers/                 # Endpoints API
+│   ├── routers/                 # [TODO Phase 4] Endpoints REST API (à supprimer)
 │   │   ├── __init__.py
 │   │   ├── soundcloud_router.py  # Router pour Soundcloud
 │   │   ├── beatport_router.py    # Router pour Beatport
@@ -60,7 +70,10 @@ techno-scraper/
 ├── tests/                       # Tests unitaires et d'intégration
 │   ├── __init__.py
 │   ├── conftest.py              # Configuration des tests
-│   ├── integration/             # Tests d'intégration
+│   ├── mcp/                     # [NOUVEAU] Tests des MCP tools
+│   │   ├── __init__.py
+│   │   └── test_soundcloud_mcp_tools.py  # Tests tools SoundCloud
+│   ├── integration/             # Tests d'intégration REST (legacy)
 │   │   ├── mocks/               # Mocks pour les tests d'intégration
 │   │   ├── test_api_routes.py   # Tests des routes API générales
 │   │   ├── test_bandcamp_router.py # Tests des routes Bandcamp
@@ -95,6 +108,10 @@ techno-scraper/
 ├── requirements.txt             # Dépendances Python principales
 ├── requirements-test.txt        # Dépendances pour les tests
 ├── pytest.ini                   # Configuration pytest
+├── mcp_config.json              # Configuration MCP générique
+├── claude_desktop_config.json   # Configuration pour Claude Desktop
+├── MCP_USAGE.md                 # Documentation d'utilisation MCP
+├── N8N_MCP_SETUP.md             # Guide d'intégration n8n avec MCP
 └── README.md                    # Documentation du projet
 ```
 
@@ -191,11 +208,27 @@ flowchart TD
 
 ## Détails des composants principaux
 
-### 1. API Layer (FastAPI)
+### 0. MCP Layer (Nouveau - Interface moderne)
+
+-   **app/mcp/server.py**: Serveur MCP principal avec gestion des tools
+    -   Communication via stdio (JSON-RPC)
+    -   Enregistrement et exécution des tools
+    -   Logging et gestion d'erreurs
+-   **app/mcp/tools/**: Définition des MCP tools par plateforme
+    -   **soundcloud_tools.py**: Tools SoundCloud (`soundcloud_search_profiles`, `soundcloud_get_profile`)
+    -   **beatport_tools.py**: [À venir Phase 2] Tools Beatport
+    -   **bandcamp_tools.py**: [À venir Phase 3] Tools Bandcamp
+-   Architecture orientée tools, pas routes
+-   Intégration native avec Claude Desktop, n8n MCP, et autres clients MCP
+-   Variables d'environnement lues depuis .env
+-   **tests/mcp/**: Tests d'intégration des MCP tools
+
+### 1. API Layer (FastAPI - Legacy, à supprimer Phase 4)
 
 -   **main.py**: Point d'entrée de l'application, configuration des middlewares et des routers
 -   **core/security.py**: Middleware d'authentification par clé API
 -   **routers/**: Endpoints API organisés par site (un router par site)
+-   **Note**: Cette couche sera supprimée après migration complète vers MCP
 
 ### 2. Business Layer (Services)
 
@@ -264,10 +297,81 @@ flowchart TD
 -   **Tests unitaires**: Validation des composants individuels
     -   Scrapers: Tests de l'extraction et de la transformation des données
     -   Services: Tests de la logique métier et des retries
--   **Tests d'intégration**: Validation des interactions entre composants
-    -   API: Tests des endpoints, validation des entrées/sorties
-    -   Workflows: Tests des scénarios de bout en bout
+-   **Tests d'intégration REST** (legacy): Validation des endpoints FastAPI
+    -   API: Tests des routers, validation des entrées/sorties
+    -   tests/integration/test_*_router.py
+-   **Tests d'intégration MCP** (nouveau): Validation des MCP tools
+    -   Tools: Tests de l'exécution et des retours des tools
+    -   tests/mcp/test_*_mcp_tools.py
 -   **Mocks**: Simulation des API externes pour des tests reproductibles
+
+## Architecture MCP (Model Context Protocol)
+
+### Principe
+
+Le MCP (Model Context Protocol) est un protocole standardisé par Anthropic permettant aux agents IA d'interagir avec des outils externes via JSON-RPC sur stdio.
+
+### Avantages par rapport à REST
+
+- **Intégration native** : Pas besoin de gérer des requêtes HTTP, l'agent appelle directement les tools
+- **Typage fort** : Les paramètres sont validés via JSON Schema
+- **Communication sécurisée** : Via stdio, pas d'exposition réseau nécessaire
+- **Simplification** : Pas besoin de middleware d'authentification, CORS, etc.
+
+### Architecture technique
+
+```
+Client MCP (Claude Desktop/n8n)
+    ↓ JSON-RPC via stdio
+Serveur MCP (app/mcp/server.py)
+    ↓ Appel Python direct
+MCP Tools (app/mcp/tools/*.py)
+    ↓ Appel Python direct
+Scrapers (app/scrapers/*.py)
+    ↓
+Services (app/services/*.py)
+    ↓
+Sites externes (SoundCloud, Beatport, etc.)
+```
+
+### Tools vs Routes
+
+- **REST API** : Une route = un endpoint HTTP (ex: `GET /api/soundcloud/search`)
+- **MCP** : Un tool = une fonction Python exposée (ex: `soundcloud_search_profiles`)
+- **Granularité** : 1 tool = 1 route (mapping 1:1)
+
+### Configuration
+
+Les clients MCP (Claude Desktop, n8n) configurent le serveur via JSON :
+
+```json
+{
+  "mcpServers": {
+    "techno-scraper": {
+      "command": "python",
+      "args": ["-m", "app.mcp.server"],
+      "cwd": "/path/to/techno-scraper"
+    }
+  }
+}
+```
+
+Les variables d'environnement (SOUNDCLOUD_CLIENT_ID, etc.) sont lues depuis le `.env` du projet.
+
+### Migration REST → MCP
+
+**Plan de migration en 4 phases** :
+
+1. **Phase 1** ✅ : Implémentation MCP SoundCloud (coexistence REST + MCP)
+2. **Phase 2** 🔄 : Ajout des tools Beatport
+3. **Phase 3** 🔄 : Ajout des tools Bandcamp
+4. **Phase 4** 📅 : Suppression complète de l'API REST
+   - Supprimer `app/main.py`
+   - Supprimer `app/routers/`
+   - Supprimer `tests/integration/test_*_router.py`
+   - Nettoyer les dépendances FastAPI inutiles
+
+**Code métier partagé** : Les scrapers et services restent inchangés pendant toute la migration.
 
 ## Informations complémentaires
 

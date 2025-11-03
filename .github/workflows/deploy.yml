@@ -1,4 +1,8 @@
-name: Deploy to VPS
+# TODO: [Dokploy Migration] Ce workflow est OBSOLÈTE
+# Dokploy gère maintenant le déploiement automatique via webhook GitHub
+# À SUPPRIMER après confirmation que Dokploy fonctionne correctement
+
+name: Deploy to VPS (OBSOLETE - Use Dokploy)
 
 on:
     push:

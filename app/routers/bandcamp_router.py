@@ -6,6 +6,9 @@ from app.core.security import get_api_key
 from app.models import (ErrorResponse, BandcampSearchResult, BandcampEntityType)
 from app.scrapers import BandcampSearchScraper
 
+# TODO: [MCP Migration - Phase 3] Ce router sera supprimé après implémentation des MCP tools Bandcamp
+# À remplacer par app/mcp/tools/bandcamp_tools.py
+
 # Création du router
 router = APIRouter(
     prefix="/bandcamp",

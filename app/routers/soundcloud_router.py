@@ -13,6 +13,9 @@ from app.scrapers import (
     SoundcloudWebprofilesScraper
 )
 
+# TODO: [MCP Migration - Phase 4] Ce router sera supprimé après migration complète vers MCP
+# Fonctionnalités remplacées par app/mcp/tools/soundcloud_tools.py
+
 # Création du router
 router = APIRouter(
     prefix="/soundcloud",
