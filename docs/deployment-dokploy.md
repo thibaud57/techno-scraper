@@ -280,8 +280,8 @@ docker logs techno-scraper-mcp
 
 - [Documentation Dokploy](https://docs.dokploy.com/)
 - [Docker Compose Networking](https://docs.docker.com/compose/networking/)
-- [MCP Usage Guide](./MCP_USAGE.md)
-- [n8n MCP Setup](./N8N_MCP_SETUP.md)
+- [MCP Usage Guide](./mcp-usage.md)
+- [n8n MCP Setup](./n8n-mcp-setup.md)
 
 ## 🔐 Sécurité
 

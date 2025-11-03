@@ -24,7 +24,7 @@ Le projet supporte maintenant le **Model Context Protocol (MCP)** d'Anthropic po
 python -m app.mcp.server
 ```
 
-📖 **Documentation complète** : [MCP_USAGE.md](./MCP_USAGE.md) | [N8N_MCP_SETUP.md](./N8N_MCP_SETUP.md)
+📖 **Documentation complète** : [MCP Usage](./docs/mcp-usage.md) | [n8n MCP Setup](./docs/n8n-mcp-setup.md)
 
 ## 🚀 Fonctionnalités
 
@@ -74,7 +74,7 @@ Le projet est prêt pour un déploiement automatisé sur Dokploy :
 # 6. Activer Auto-Deploy
 ```
 
-📖 **Guide complet** : [DOKPLOY_DEPLOYMENT.md](./DOKPLOY_DEPLOYMENT.md)
+📖 **Guide complet** : [Déploiement Dokploy](./docs/deployment-dokploy.md)
 
 ## ⚙️ Configuration
 
@@ -124,12 +124,12 @@ Voir [tests/README.md](tests/README.md) pour plus de détails.
 ## 📚 Documentation complète
 
 - **[docs/architecture.md](docs/architecture.md)** - Architecture technique détaillée
-- **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** - Journal de développement et état du projet
+- **[docs/development.md](docs/development.md)** - Journal de développement et état du projet
 - **[tests/README.md](tests/README.md)** - Guide des tests
 
 ## 🤝 Contribution
 
-Les contributions sont bienvenues ! Consultez [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) pour le workflow de développement.
+Les contributions sont bienvenues ! Consultez [docs/development.md](docs/development.md) pour le workflow de développement.
 
 ## 📄 Licence
 
