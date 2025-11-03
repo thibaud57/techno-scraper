@@ -1,10 +1,13 @@
 import json
 import logging
+import os
 from typing import Any
 
 from mcp.server import Server
-from mcp.server.stdio import stdio_server
+from mcp.server.sse import sse_server
 from mcp.types import TextContent
+from starlette.applications import Starlette
+from starlette.routing import Route
 
 from app.mcp.tools import (
     soundcloud_search_profiles_tool,
@@ -42,22 +45,34 @@ def create_mcp_server() -> Server:
     return server
 
 
-async def main():
+mcp_server = create_mcp_server()
+
+
+async def handle_sse(request):
+    async with sse_server() as (read_stream, write_stream):
+        await mcp_server.run(
+            read_stream,
+            write_stream,
+            mcp_server.create_initialization_options(),
+        )
+
+
+routes = [
+    Route("/mcp", endpoint=handle_sse),
+]
+
+app = Starlette(routes=routes)
+
+
+if __name__ == "__main__":
+    import uvicorn
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    server = create_mcp_server()
+    port = int(os.getenv("MCP_PORT", "8080"))
+    logger.info(f"Starting MCP server on http://0.0.0.0:{port}/mcp")
 
-    async with stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream,
-            write_stream,
-            server.create_initialization_options(),
-        )
-
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+    uvicorn.run(app, host="0.0.0.0", port=port)

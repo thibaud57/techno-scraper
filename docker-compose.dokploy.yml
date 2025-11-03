@@ -32,12 +32,13 @@ services:
     environment:
       - SOUNDCLOUD_CLIENT_ID=${SOUNDCLOUD_CLIENT_ID}
       - SOUNDCLOUD_CLIENT_SECRET=${SOUNDCLOUD_CLIENT_SECRET}
+      - MCP_PORT=8080
     networks:
       - dokploy-network
-    # Pas de ports exposés - communication via stdio dans le réseau Docker
-    # Healthcheck basé sur le processus Python
+    # Port 8080 accessible uniquement depuis le réseau Docker (pas d'exposition externe)
+    # n8n peut se connecter via http://techno-scraper-mcp:8080/mcp
     healthcheck:
-      test: ["CMD", "pgrep", "-f", "app.mcp"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/mcp"]
       interval: 30s
       timeout: 10s
       retries: 3
