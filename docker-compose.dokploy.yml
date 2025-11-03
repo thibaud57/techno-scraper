@@ -37,7 +37,7 @@ services:
     # Pas de ports exposés - communication via stdio dans le réseau Docker
     # Healthcheck basé sur le processus Python
     healthcheck:
-      test: ["CMD", "pgrep", "-f", "app.mcp.server"]
+      test: ["CMD", "pgrep", "-f", "app.mcp"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -26,7 +26,7 @@ cp .env.example .env
 
 ```bash
 # Vérifier que le serveur démarre correctement
-python -m app.mcp.server
+python -m app.mcp
 ```
 
 Si tout fonctionne, vous devriez voir des logs sans erreur.
@@ -42,7 +42,7 @@ Si tout fonctionne, vous devriez voir des logs sans erreur.
   "mcpServers": {
     "techno-scraper": {
       "command": "python",
-      "args": ["-m", "app.mcp.server"],
+      "args": ["-m", "app.mcp"],
       "cwd": "/path/to/techno-scraper",
       "env": {
         "SOUNDCLOUD_CLIENT_ID": "your-client-id",
@@ -117,7 +117,7 @@ echo '{
     }
   },
   "id": 1
-}' | python -m app.mcp.server
+}' | python -m app.mcp
 ```
 
 ## 📊 Exemple de workflow complet

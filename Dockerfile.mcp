@@ -12,8 +12,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Serveur MCP - Communication via stdio (pas de port HTTP)
-CMD ["python", "-m", "app.mcp.server"]
+CMD ["python", "-m", "app.mcp"]
 
 # Healthcheck basé sur le processus
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD pgrep -f "app.mcp.server" || exit 1
+    CMD pgrep -f "app.mcp" || exit 1
