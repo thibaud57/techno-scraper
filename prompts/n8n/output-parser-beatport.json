@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "genre": {
+      "type": "string",
+      "description": "Genre musical principal du label (facets Beatport mappé selon le tableau). Chaîne vide si pas de releases ou facets vides."
+    },
+    "isActive": {
+      "type": "boolean",
+      "description": "True si le label a au moins 10 releases sur 12 mois, false sinon. Ce champ est toujours calculable."
+    },
+    "isOpenNew": {
+      "type": "boolean",
+      "description": "True si au moins 3 artistes uniques sur les releases, false sinon. Ce champ est toujours calculable."
+    },
+    "beatportLink": {
+      "type": "string",
+      "description": "URL de la page Beatport du label. Chaîne vide si label introuvable."
+    }
+  },
+  "required": ["isActive", "isOpenNew"]
+}

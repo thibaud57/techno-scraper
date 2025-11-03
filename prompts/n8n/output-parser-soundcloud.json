@@ -1,0 +1,39 @@
+{
+  "type": "object",
+  "properties": {
+    "country": {
+      "type": "string",
+      "description": "Pays d'origine du label (champ 'location' ou bio SoundCloud). Chaîne vide si introuvable."
+    },
+    "emailDemo": {
+      "type": "string",
+      "description": "Email/formulaire pour démos (bio SoundCloud). Email, URL de formulaire, 'FORM', ou chaîne vide."
+    },
+    "scFollowers": {
+      "type": "number",
+      "description": "Nombre de followers SoundCloud (champ 'followers_count'). Retourner 0 si profil introuvable.",
+      "minimum": 0
+    },
+    "soundcloudLink": {
+      "type": "string",
+      "description": "URL du profil SoundCloud. Chaîne vide si profil introuvable."
+    },
+    "facebookLink": {
+      "type": "string",
+      "description": "URL Facebook (social_links platform='facebook'). Chaîne vide si non trouvé."
+    },
+    "instagramLink": {
+      "type": "string",
+      "description": "URL Instagram (social_links platform='instagram'). Chaîne vide si non trouvé."
+    },
+    "beatportLink": {
+      "type": "string",
+      "description": "URL Beatport (social_links platform='beatport'). Chaîne vide si non trouvé."
+    },
+    "bandcampLink": {
+      "type": "string",
+      "description": "URL Bandcamp (social_links platform='bandcamp'). Chaîne vide si non trouvé."
+    }
+  },
+  "required": ["scFollowers"]
+}
